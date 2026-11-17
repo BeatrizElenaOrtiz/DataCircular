@@ -1,0 +1,112 @@
+{
+  "timestamp": "2026-11-06T15:21:00.987Z",
+  "kpis": {
+    "tonsRecoveredTotal": 2.96,
+    "tonsRecoveredThisMonth": 2.96,
+    "activeMatchesCount": 16,
+    "verifiedOrganizationsCount": 0,
+    "totalOperationsCount": 12,
+    "closedOperationsCount": 6,
+    "averageSatisfaction": 5
+  },
+  "analitica": {
+    "circularKpis": {
+      "tonsRecoveredTotal": 2.96,
+      "tonsRecoveredThisMonth": 2.96,
+      "activeMatchesCount": 16,
+      "verifiedOrganizationsCount": 0,
+      "totalOperationsCount": 12,
+      "closedOperationsCount": 6,
+      "averageSatisfaction": 5
+    },
+    "userMetrics": {
+      "totalUsers": 34,
+      "activeUsers": 34,
+      "inactiveUsers": 0,
+      "suspendedUsers": 0,
+      "newUsersThisMonth": 34,
+      "usersByType": {
+        "generator": 18,
+        "recycler": 6,
+        "transporter": 6,
+        "transformer": 4
+      },
+      "usersByRole": {
+        "user": 30,
+        "admin": 4
+      },
+      "activeUsersPercentage": 100,
+      "newUsersGrowthPercentage": 100
+    },
+    "connectionMetrics": {
+      "databaseLatencyMs": 5,
+      "uptimeSeconds": 1,
+      "totalRequests": 22,
+      "successfulRequests": 22,
+      "failedRequests": 0,
+      "successRatePercentage": 100,
+      "activeConnections": 6,
+      "peakConnectionHour": "10:00 - 11:00 (UTC-5)",
+      "peakConnectionsCount": 22,
+      "averageLatencyMs": 53.8,
+      "databaseStatus": "connected",
+      "environment": "development"
+    },
+    "visitMetrics": {
+      "totalVisitsCount": 6,
+      "averageSessionDurationMinutes": 5.2,
+      "activeSessionsCount": 6,
+      "closedSessionsCount": 0,
+      "bounceRatePercentage": 16.7,
+      "averageRequestsPerSession": 3.7,
+      "lastVisitTimestamp": "2026-11-06T15:21:00.856Z"
+    },
+    "suggestions": [
+      {
+        "id": "sug-db-latency",
+        "title": "Latencia Óptima de Base de Datos (< 60ms)",
+        "category": "performance",
+        "description": "La conexión con PostgreSQL en localhost registra 5ms de respuesta promedio.",
+        "currentStatus": "Excelente (5ms)",
+        "recommendation": "Mantener el esquema de indexación en Prisma (índices en status, deletedAt, categoryId y pickupArea) para preservar tiempos de respuesta sub-100ms cuando escale la base de usuarios.",
+        "impact": "LOW"
+      },
+      {
+        "id": "sug-dau-mau",
+        "title": "Monitoreo de Adherencia Diaria (DAU / MAU Stickiness Ratio)",
+        "category": "engagement",
+        "description": "Medir la proporción entre Usuarios Activos Diarios (DAU) y Usuarios Activos Mensuales (MAU) para recicladores y generadores.",
+        "currentStatus": "Recomendada para implementación analítica",
+        "recommendation": "Un ratio DAU/MAU superior al 20% es el estándar de éxito para herramientas logísticas operativas. Se sugiere implementar notificaciones push de nuevos matches en la zona del reciclador para elevar la frecuencia de apertura.",
+        "impact": "HIGH"
+      },
+      {
+        "id": "sug-mobile-field-connection",
+        "title": "Resiliencia de Conexión en Campo (Offline-First / Reintentos)",
+        "category": "reliability",
+        "description": "Pico registrado en franja 10:00 - 11:00 (UTC-5). Los transportadores y recicladores operan frecuentemente en bodegas y zonas industriales con cobertura 3G/4G inestable.",
+        "currentStatus": "Operación online estándar activa",
+        "recommendation": "Habilitar cola de sincronización offline en la app móvil (Expo SQLite / Async Storage) para que pesajes, tickets y firmas de operaciones puedan registrarse sin conexión y sincronizarse al recuperar señal.",
+        "impact": "HIGH"
+      },
+      {
+        "id": "sug-p95-percentiles",
+        "title": "Auditoría de Percentiles de Latencia (P95 / P99)",
+        "category": "scalability",
+        "description": "Tasa de éxito actual: 100%. Los promedios pueden ocultar peticiones lentas experimentadas por el 5% de usuarios más alejados.",
+        "currentStatus": "100% de solicitudes exitosas",
+        "recommendation": "Configurar métricas distribuidas (OpenTelemetry o Prometheus) para desglosar la latencia por percentil P95 y P99, identificando cuellos de botella en la subida de evidencias fotográficas de pesaje.",
+        "impact": "MEDIUM"
+      },
+      {
+        "id": "sug-data-saving",
+        "title": "Compresión HTTP (GZIP/Brotli) y Caché HTTP (ETags)",
+        "category": "performance",
+        "description": "Optimización de transferencia de datos en planes móviles para recicladores de base y cooperativas.",
+        "currentStatus": "Transferencia JSON directa",
+        "recommendation": "Activar middleware compression en Express y encabezados ETag en catálogos y listados para reducir el consumo de megabytes en dispositivos móviles hasta en un 65%.",
+        "impact": "MEDIUM"
+      }
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+services:
+  - type: web
+    name: data-circular-api-staging
+    runtime: node
+    region: ohio
+    plan: free
+    buildCommand: npm ci --include=dev && npm run db:generate && npm run build
+    startCommand: npm run db:deploy && npm run start:api
+    healthCheckPath: /api/v1/health
+    autoDeployTrigger: off
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: DATA_POLICY_VERSION
+        value: 2026.11.09
+      - key: DATA_POLICY_URL
+        value: https://data-circular-api-staging.onrender.com/politica-datos
+      - key: TERMS_VERSION
+        value: 2026.11.17
+      - key: REQUIRE_TERMS_ACCEPTANCE
+        value: "true"
+      - key: SIMULATED_PASSWORD_RECOVERY_ENABLED
+        value: "false"
+      - key: SAMPLE_CERTIFICATES_ENABLED
+        value: "false"
+      - key: PURGE_SCHEDULER_ENABLED
+        value: "false"
+      - key: ACCOUNT_DELETION_RETENTION_DAYS
+        value: "30"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: data-circular-staging-db
+          property: connectionString
+
+databases:
+  - name: data-circular-staging-db
+    databaseName: datacircular
+    user: datacircular
+    plan: free
+    region: ohio
+    postgresMajorVersion: "18"

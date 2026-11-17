@@ -1,0 +1,10 @@
+{
+  "conversacionId": "75ef6979-7eac-49e2-b174-c479485c7d09",
+  "publicacionId": "235f97b3-28be-45d0-8399-8dcb30cc0779",
+  "participantes": [
+    "RecicladorPrueba1",
+    "GeneradorPrueba1"
+  ],
+  "mensajesIntercambiados": 2,
+  "estado": "ACTIVE"
+}

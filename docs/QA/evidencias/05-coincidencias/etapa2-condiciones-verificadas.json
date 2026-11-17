@@ -1,0 +1,11 @@
+{
+  "usuario": "RecicladorPrueba1",
+  "organizacionId": "6b4b868c-0ccf-4d16-9695-bd742e8f4851",
+  "fase1_registro": true,
+  "fase2_validacion_obligatoria": true,
+  "fase3_guardado_bd": true,
+  "fase4_relacion_usuario_org": true,
+  "fase5_consulta_posterior": true,
+  "fase6_edicion_api": true,
+  "fase7_uso_en_matching": true
+}

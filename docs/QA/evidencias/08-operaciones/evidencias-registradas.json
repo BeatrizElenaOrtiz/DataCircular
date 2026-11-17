@@ -1,0 +1,290 @@
+{
+  "operacionId": "e26d4ddc-59fe-4f48-bf41-7e7e5ff39fd7",
+  "evidencias": [
+    {
+      "evidence": {
+        "id": "3bfdd21d-04a0-4b6c-bdc8-783cfe4484c9",
+        "operationId": "e26d4ddc-59fe-4f48-bf41-7e7e5ff39fd7",
+        "type": "WEIGHING_TICKET",
+        "fileUrl": "https://storage.datacircular.imara.org/evidences/ticket-bascula-op001-452kg.pdf",
+        "description": "Tiquete de pesaje certificado en báscula de plataforma: 452.4 kg neto.",
+        "weightKg": 452.4,
+        "uploadedByUserId": "985891cf-f02e-4a01-b7f2-2ea95ffa8952",
+        "uploadedByName": "Logística y Fletes Verdes Bogotá",
+        "createdAt": "2026-11-06T15:21:00.578Z"
+      },
+      "operation": {
+        "id": "e26d4ddc-59fe-4f48-bf41-7e7e5ff39fd7",
+        "code": "OP-BOG-2026-0012-573",
+        "proposalId": "3ab5344c-f9bb-47e5-a6df-8a53f1a3e538",
+        "publicationId": "235f97b3-28be-45d0-8399-8dcb30cc0779",
+        "sellerUserId": "70efd92d-8874-472d-97c2-573fcb5768fd",
+        "sellerOrganizationId": null,
+        "seller": {
+          "userId": "70efd92d-8874-472d-97c2-573fcb5768fd",
+          "displayName": "Generador Industrial Fontibón SAS",
+          "phone": "+57 310 1000001",
+          "organizationId": null,
+          "organizationName": null,
+          "userType": "GENERATOR"
+        },
+        "buyerUserId": "cbf024d2-8455-4efa-b613-0cda1e9c0650",
+        "buyerOrganizationId": null,
+        "buyer": {
+          "userId": "cbf024d2-8455-4efa-b613-0cda1e9c0650",
+          "displayName": "Asociación de Recicladores de Oficio Fontibón",
+          "phone": "+57 310 1000003",
+          "organizationId": null,
+          "organizationName": null,
+          "userType": "RECYCLER"
+        },
+        "transporterUserId": "985891cf-f02e-4a01-b7f2-2ea95ffa8952",
+        "transporterOrganizationId": null,
+        "transporter": {
+          "userId": "985891cf-f02e-4a01-b7f2-2ea95ffa8952",
+          "displayName": "Logística y Fletes Verdes Bogotá",
+          "phone": "+57 310 1000007",
+          "userType": "TRANSPORTER"
+        },
+        "materialCategoryId": "286920c8-a05a-43ac-add4-94492c211493",
+        "materialCategoryName": "PET (1)",
+        "quantity": 450,
+        "unitId": "b30dbfdc-74ce-4db6-8617-e4023c8b6ce4",
+        "unitName": "Kilogramo",
+        "unitAbbreviation": "kg",
+        "agreedPriceCop": null,
+        "status": "EVIDENCE",
+        "scheduledDate": "2026-11-07T15:21:00.500Z",
+        "scheduledTimeSlot": "08:00 - 11:00 AM",
+        "pickupAddress": "Calle 17 # 92-30, Bodega 4, Fontibón",
+        "pickupCity": "Bogotá D.C.",
+        "pickupArea": "Fontibón",
+        "deliveryAddress": "Carrera 106 # 15-20, Centro de Acopio Fontibón",
+        "deliveryCity": "Bogotá D.C.",
+        "deliveryArea": "Fontibón",
+        "transportNotes": "Camión con báscula calibrada y certificación ambiental al día.",
+        "vehiclePlate": "TLK-902",
+        "driverName": "Carlos Mario Ruiz - Fletes Verdes Bogotá",
+        "actualWeight": 452.4,
+        "receivedNotes": null,
+        "closedAt": null,
+        "cancelledAt": null,
+        "cancellationReason": null,
+        "createdAt": "2026-11-06T15:21:00.462Z",
+        "updatedAt": "2026-11-06T15:21:00.582Z",
+        "evidences": [
+          {
+            "id": "3bfdd21d-04a0-4b6c-bdc8-783cfe4484c9",
+            "operationId": "e26d4ddc-59fe-4f48-bf41-7e7e5ff39fd7",
+            "type": "WEIGHING_TICKET",
+            "fileUrl": "https://storage.datacircular.imara.org/evidences/ticket-bascula-op001-452kg.pdf",
+            "description": "Tiquete de pesaje certificado en báscula de plataforma: 452.4 kg neto.",
+            "weightKg": 452.4,
+            "uploadedByUserId": "985891cf-f02e-4a01-b7f2-2ea95ffa8952",
+            "uploadedByName": "Logística y Fletes Verdes Bogotá",
+            "createdAt": "2026-11-06T15:21:00.578Z"
+          }
+        ],
+        "reviews": [],
+        "timeline": [
+          {
+            "stage": "ACCEPTED",
+            "label": "Acuerdo Aceptado",
+            "description": "Propuesta formal acordada entre las partes",
+            "completedAt": "2026-11-06T15:21:00.462Z",
+            "isDone": true,
+            "isActive": false
+          },
+          {
+            "stage": "SCHEDULED",
+            "label": "Recolección Agendada",
+            "description": "Fecha, hora y punto de recolección programados",
+            "completedAt": "2026-11-07T15:21:00.500Z",
+            "isDone": true,
+            "isActive": false
+          },
+          {
+            "stage": "COLLECTING",
+            "label": "En Recolección",
+            "description": "Vehículo en ruta y recolección en sitio",
+            "completedAt": null,
+            "isDone": true,
+            "isActive": false
+          },
+          {
+            "stage": "EVIDENCE",
+            "label": "Pesaje y Evidencias",
+            "description": "Pesaje en báscula y soporte documental cargado",
+            "completedAt": null,
+            "isDone": true,
+            "isActive": true
+          },
+          {
+            "stage": "RECEIVED",
+            "label": "Recepción Conforme",
+            "description": "Lote ingresado y verificado en destino",
+            "completedAt": null,
+            "isDone": false,
+            "isActive": false
+          },
+          {
+            "stage": "CLOSED",
+            "label": "Cierre y Calificación",
+            "description": "Operación concluida y liquidada con éxito",
+            "completedAt": null,
+            "isDone": false,
+            "isActive": false
+          }
+        ]
+      }
+    },
+    {
+      "evidence": {
+        "id": "24c8f458-2d46-4f4f-a3c5-73664de8b65f",
+        "operationId": "e26d4ddc-59fe-4f48-bf41-7e7e5ff39fd7",
+        "type": "PHOTO",
+        "fileUrl": "https://storage.datacircular.imara.org/evidences/foto-pacas-pet-cargadas.jpg",
+        "description": "Fotografía de las 9 pacas de PET cristal cargadas en vehículo.",
+        "weightKg": null,
+        "uploadedByUserId": "cbf024d2-8455-4efa-b613-0cda1e9c0650",
+        "uploadedByName": "Asociación de Recicladores de Oficio Fontibón",
+        "createdAt": "2026-11-06T15:21:00.609Z"
+      },
+      "operation": {
+        "id": "e26d4ddc-59fe-4f48-bf41-7e7e5ff39fd7",
+        "code": "OP-BOG-2026-0012-573",
+        "proposalId": "3ab5344c-f9bb-47e5-a6df-8a53f1a3e538",
+        "publicationId": "235f97b3-28be-45d0-8399-8dcb30cc0779",
+        "sellerUserId": "70efd92d-8874-472d-97c2-573fcb5768fd",
+        "sellerOrganizationId": null,
+        "seller": {
+          "userId": "70efd92d-8874-472d-97c2-573fcb5768fd",
+          "displayName": "Generador Industrial Fontibón SAS",
+          "phone": "+57 310 1000001",
+          "organizationId": null,
+          "organizationName": null,
+          "userType": "GENERATOR"
+        },
+        "buyerUserId": "cbf024d2-8455-4efa-b613-0cda1e9c0650",
+        "buyerOrganizationId": null,
+        "buyer": {
+          "userId": "cbf024d2-8455-4efa-b613-0cda1e9c0650",
+          "displayName": "Asociación de Recicladores de Oficio Fontibón",
+          "phone": "+57 310 1000003",
+          "organizationId": null,
+          "organizationName": null,
+          "userType": "RECYCLER"
+        },
+        "transporterUserId": "985891cf-f02e-4a01-b7f2-2ea95ffa8952",
+        "transporterOrganizationId": null,
+        "transporter": {
+          "userId": "985891cf-f02e-4a01-b7f2-2ea95ffa8952",
+          "displayName": "Logística y Fletes Verdes Bogotá",
+          "phone": "+57 310 1000007",
+          "userType": "TRANSPORTER"
+        },
+        "materialCategoryId": "286920c8-a05a-43ac-add4-94492c211493",
+        "materialCategoryName": "PET (1)",
+        "quantity": 450,
+        "unitId": "b30dbfdc-74ce-4db6-8617-e4023c8b6ce4",
+        "unitName": "Kilogramo",
+        "unitAbbreviation": "kg",
+        "agreedPriceCop": null,
+        "status": "EVIDENCE",
+        "scheduledDate": "2026-11-07T15:21:00.500Z",
+        "scheduledTimeSlot": "08:00 - 11:00 AM",
+        "pickupAddress": "Calle 17 # 92-30, Bodega 4, Fontibón",
+        "pickupCity": "Bogotá D.C.",
+        "pickupArea": "Fontibón",
+        "deliveryAddress": "Carrera 106 # 15-20, Centro de Acopio Fontibón",
+        "deliveryCity": "Bogotá D.C.",
+        "deliveryArea": "Fontibón",
+        "transportNotes": "Camión con báscula calibrada y certificación ambiental al día.",
+        "vehiclePlate": "TLK-902",
+        "driverName": "Carlos Mario Ruiz - Fletes Verdes Bogotá",
+        "actualWeight": 452.4,
+        "receivedNotes": null,
+        "closedAt": null,
+        "cancelledAt": null,
+        "cancellationReason": null,
+        "createdAt": "2026-11-06T15:21:00.462Z",
+        "updatedAt": "2026-11-06T15:21:00.612Z",
+        "evidences": [
+          {
+            "id": "3bfdd21d-04a0-4b6c-bdc8-783cfe4484c9",
+            "operationId": "e26d4ddc-59fe-4f48-bf41-7e7e5ff39fd7",
+            "type": "WEIGHING_TICKET",
+            "fileUrl": "https://storage.datacircular.imara.org/evidences/ticket-bascula-op001-452kg.pdf",
+            "description": "Tiquete de pesaje certificado en báscula de plataforma: 452.4 kg neto.",
+            "weightKg": 452.4,
+            "uploadedByUserId": "985891cf-f02e-4a01-b7f2-2ea95ffa8952",
+            "uploadedByName": "Logística y Fletes Verdes Bogotá",
+            "createdAt": "2026-11-06T15:21:00.578Z"
+          },
+          {
+            "id": "24c8f458-2d46-4f4f-a3c5-73664de8b65f",
+            "operationId": "e26d4ddc-59fe-4f48-bf41-7e7e5ff39fd7",
+            "type": "PHOTO",
+            "fileUrl": "https://storage.datacircular.imara.org/evidences/foto-pacas-pet-cargadas.jpg",
+            "description": "Fotografía de las 9 pacas de PET cristal cargadas en vehículo.",
+            "weightKg": null,
+            "uploadedByUserId": "cbf024d2-8455-4efa-b613-0cda1e9c0650",
+            "uploadedByName": "Asociación de Recicladores de Oficio Fontibón",
+            "createdAt": "2026-11-06T15:21:00.609Z"
+          }
+        ],
+        "reviews": [],
+        "timeline": [
+          {
+            "stage": "ACCEPTED",
+            "label": "Acuerdo Aceptado",
+            "description": "Propuesta formal acordada entre las partes",
+            "completedAt": "2026-11-06T15:21:00.462Z",
+            "isDone": true,
+            "isActive": false
+          },
+          {
+            "stage": "SCHEDULED",
+            "label": "Recolección Agendada",
+            "description": "Fecha, hora y punto de recolección programados",
+            "completedAt": "2026-11-07T15:21:00.500Z",
+            "isDone": true,
+            "isActive": false
+          },
+          {
+            "stage": "COLLECTING",
+            "label": "En Recolección",
+            "description": "Vehículo en ruta y recolección en sitio",
+            "completedAt": null,
+            "isDone": true,
+            "isActive": false
+          },
+          {
+            "stage": "EVIDENCE",
+            "label": "Pesaje y Evidencias",
+            "description": "Pesaje en báscula y soporte documental cargado",
+            "completedAt": null,
+            "isDone": true,
+            "isActive": true
+          },
+          {
+            "stage": "RECEIVED",
+            "label": "Recepción Conforme",
+            "description": "Lote ingresado y verificado en destino",
+            "completedAt": null,
+            "isDone": false,
+            "isActive": false
+          },
+          {
+            "stage": "CLOSED",
+            "label": "Cierre y Calificación",
+            "description": "Operación concluida y liquidada con éxito",
+            "completedAt": null,
+            "isDone": false,
+            "isActive": false
+          }
+        ]
+      }
+    }
+  ]
+}

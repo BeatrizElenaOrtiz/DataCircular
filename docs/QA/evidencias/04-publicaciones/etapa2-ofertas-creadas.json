@@ -1,0 +1,24 @@
+{
+  "timestamp": "2026-11-06T16:25:45.118Z",
+  "oferta1": {
+    "id": "84591486-48cd-4987-97a9-4d4088c0d20a",
+    "usuario": "GeneradorPrueba1",
+    "material": "PET",
+    "cantidad": 450,
+    "municipio": "Fontibón"
+  },
+  "oferta2": {
+    "id": "58ae39ac-3eaa-439f-8b7c-c093e10cca07",
+    "usuario": "GeneradorPrueba1",
+    "material": "Cartón",
+    "cantidad": 600,
+    "municipio": "Fontibón"
+  },
+  "oferta3": {
+    "id": "89fbaf4c-14ad-4740-8c7e-f81baca69747",
+    "usuario": "GeneradorPrueba2",
+    "material": "Aluminio",
+    "cantidad": 300,
+    "municipio": "Kennedy"
+  }
+}

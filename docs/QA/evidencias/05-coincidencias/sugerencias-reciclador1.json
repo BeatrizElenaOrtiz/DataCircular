@@ -1,0 +1,147 @@
+{
+  "totalSugerencias": 3,
+  "ofertaEsperadaEncontrada": true,
+  "muestras": [
+    {
+      "id": "235f97b3-28be-45d0-8399-8dcb30cc0779",
+      "type": "OFFER",
+      "ownerUserId": "70efd92d-8874-472d-97c2-573fcb5768fd",
+      "organizationId": null,
+      "categoryId": "286920c8-a05a-43ac-add4-94492c211493",
+      "quantity": 450,
+      "unitId": "b30dbfdc-74ce-4db6-8617-e4023c8b6ce4",
+      "description": "450 kg de botellas PET cristal limpias, prensadas en pacas de 50 kg, listas para recolección.",
+      "requiresTransport": false,
+      "locationAddress": "Calle 17 # 92-30, Bodega 4",
+      "locationCity": "Bogotá D.C.",
+      "locationArea": "Fontibón",
+      "condition": "Limpio prensado",
+      "photoUrl": null,
+      "isUrgent": false,
+      "status": "ACTIVE",
+      "expiresAt": null,
+      "createdAt": "2026-11-06T15:21:00.238Z",
+      "updatedAt": "2026-11-06T15:21:00.238Z",
+      "deletedAt": null,
+      "ownerUser": {
+        "id": "70efd92d-8874-472d-97c2-573fcb5768fd",
+        "fullName": "Generador Industrial Fontibón SAS",
+        "email": "generador1.prueba@datacircular.local",
+        "phone": "+57 310 1000001"
+      },
+      "organization": null,
+      "category": {
+        "id": "286920c8-a05a-43ac-add4-94492c211493",
+        "name": "PET (1)",
+        "description": "Botellas de bebidas",
+        "parentId": "5e607884-493b-43b2-9a58-6ef09931ad62",
+        "active": true,
+        "createdAt": "2026-11-05T15:25:15.273Z",
+        "updatedAt": "2026-11-05T15:26:59.324Z",
+        "parent": {
+          "id": "5e607884-493b-43b2-9a58-6ef09931ad62",
+          "name": "Plásticos"
+        }
+      },
+      "unit": {
+        "id": "b30dbfdc-74ce-4db6-8617-e4023c8b6ce4",
+        "name": "Kilogramo",
+        "abbreviation": "kg",
+        "active": true
+      }
+    },
+    {
+      "id": "cc942f61-3fb7-4aa6-90cb-f5f4297cdf2e",
+      "type": "OFFER",
+      "ownerUserId": "70efd92d-8874-472d-97c2-573fcb5768fd",
+      "organizationId": null,
+      "categoryId": "a8f92e6e-f3f7-4902-b4ef-072b73215a4b",
+      "quantity": 600,
+      "unitId": "b30dbfdc-74ce-4db6-8617-e4023c8b6ce4",
+      "description": "600 kg de cartón corrugado de embalaje, limpio y desarmado en atados planos.",
+      "requiresTransport": false,
+      "locationAddress": "Calle 17 # 92-30, Bodega 4",
+      "locationCity": "Bogotá D.C.",
+      "locationArea": "Fontibón",
+      "condition": "Seco y desarmado",
+      "photoUrl": null,
+      "isUrgent": false,
+      "status": "ACTIVE",
+      "expiresAt": null,
+      "createdAt": "2026-11-05T15:27:01.031Z",
+      "updatedAt": "2026-11-05T15:27:01.031Z",
+      "deletedAt": null,
+      "ownerUser": {
+        "id": "70efd92d-8874-472d-97c2-573fcb5768fd",
+        "fullName": "Generador Industrial Fontibón SAS",
+        "email": "generador1.prueba@datacircular.local",
+        "phone": "+57 310 1000001"
+      },
+      "organization": null,
+      "category": {
+        "id": "a8f92e6e-f3f7-4902-b4ef-072b73215a4b",
+        "name": "Papel y cartón",
+        "description": "Fibras celulósicas recuperables",
+        "parentId": null,
+        "active": true,
+        "createdAt": "2026-11-05T15:25:15.442Z",
+        "updatedAt": "2026-11-05T15:26:59.488Z",
+        "parent": null
+      },
+      "unit": {
+        "id": "b30dbfdc-74ce-4db6-8617-e4023c8b6ce4",
+        "name": "Kilogramo",
+        "abbreviation": "kg",
+        "active": true
+      }
+    },
+    {
+      "id": "87e99d8f-b217-4054-ad72-a0f54afe4359",
+      "type": "OFFER",
+      "ownerUserId": "70efd92d-8874-472d-97c2-573fcb5768fd",
+      "organizationId": null,
+      "categoryId": "286920c8-a05a-43ac-add4-94492c211493",
+      "quantity": 450,
+      "unitId": "b30dbfdc-74ce-4db6-8617-e4023c8b6ce4",
+      "description": "450 kg de botellas PET cristal limpias, prensadas en pacas de 50 kg, listas para recolección en bodega industrial.",
+      "requiresTransport": false,
+      "locationAddress": "Calle 17 # 92-30, Bodega 4",
+      "locationCity": "Bogotá D.C.",
+      "locationArea": "Fontibón",
+      "condition": "Limpio y prensado",
+      "photoUrl": null,
+      "isUrgent": false,
+      "status": "ACTIVE",
+      "expiresAt": null,
+      "createdAt": "2026-11-05T15:27:01.024Z",
+      "updatedAt": "2026-11-05T15:27:01.024Z",
+      "deletedAt": null,
+      "ownerUser": {
+        "id": "70efd92d-8874-472d-97c2-573fcb5768fd",
+        "fullName": "Generador Industrial Fontibón SAS",
+        "email": "generador1.prueba@datacircular.local",
+        "phone": "+57 310 1000001"
+      },
+      "organization": null,
+      "category": {
+        "id": "286920c8-a05a-43ac-add4-94492c211493",
+        "name": "PET (1)",
+        "description": "Botellas de bebidas",
+        "parentId": "5e607884-493b-43b2-9a58-6ef09931ad62",
+        "active": true,
+        "createdAt": "2026-11-05T15:25:15.273Z",
+        "updatedAt": "2026-11-05T15:26:59.324Z",
+        "parent": {
+          "id": "5e607884-493b-43b2-9a58-6ef09931ad62",
+          "name": "Plásticos"
+        }
+      },
+      "unit": {
+        "id": "b30dbfdc-74ce-4db6-8617-e4023c8b6ce4",
+        "name": "Kilogramo",
+        "abbreviation": "kg",
+        "active": true
+      }
+    }
+  ]
+}

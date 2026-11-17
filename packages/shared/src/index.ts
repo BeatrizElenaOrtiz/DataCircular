@@ -1,0 +1,1449 @@
+import { z } from 'zod';
+
+/**
+ * DATA_CIRCULAR - Paquete Compartido (Shared)
+ * Contratos de API, tipos de dominio, esquemas de validación y localización (Bogotá, Colombia).
+ * Contexto: Proyecto de Práctica Universitaria - Fundación IMARA
+ */
+
+// ==========================================
+// ==========================================
+// Localización y Contexto Territorial (Colombia - Cobertura Nacional)
+// ==========================================
+
+export const COUNTRY_CONFIG = {
+  country: 'Colombia',
+  countryCode: 'CO',
+  dialCode: '+57',
+  currency: 'COP',
+  currencySymbol: '$',
+  locale: 'es-CO',
+  timezone: 'America/Bogota', // UTC-5
+};
+
+export const COLOMBIA_LOCATION = {
+  country: 'Colombia',
+  countryCode: 'CO',
+  coverage: 'Nacional',
+  coordinates: {
+    latitude: 4.5709,
+    longitude: -74.2973,
+  },
+};
+
+export const BOGOTA_LOCATION = {
+  city: 'Bogotá D.C.',
+  department: 'Bogotá D.C.',
+  country: 'Colombia',
+  coordinates: {
+    latitude: 4.7110,
+    longitude: -74.0721,
+  },
+};
+
+/**
+ * Principales Ciudades y Municipios de Colombia (Cobertura Nacional)
+ * Ordenados alfabéticamente (A-Z). Se excluyen las localidades distritales internas
+ * y se incluye la opción 'Otro' para municipios lejanos u otros países.
+ */
+export const COLOMBIA_MUNICIPALITIES = [
+  'Acacías',
+  'Aguachica',
+  'Aguazul',
+  'Apartadó',
+  'Arauca',
+  'Armenia',
+  'Barrancabermeja',
+  'Barranquilla',
+  'Bello',
+  'Bogotá D.C.',
+  'Bucaramanga',
+  'Buenaventura',
+  'Buga',
+  'Cajicá',
+  'Calarcá',
+  'Cali',
+  'Cartagena',
+  'Cartago',
+  'Caucasia',
+  'Cereté',
+  'Chía',
+  'Chigorodó',
+  'Chinchiná',
+  'Ciénaga',
+  'Copacabana',
+  'Cota',
+  'Cúcuta',
+  'Dosquebradas',
+  'Duitama',
+  'Envigado',
+  'Espinal',
+  'Facatativá',
+  'Florencia',
+  'Floridablanca',
+  'Funza',
+  'Fusagasugá',
+  'Garzón',
+  'Girardot',
+  'Girón',
+  'Granada',
+  'Honda',
+  'Ibagué',
+  'Inírida',
+  'Ipiales',
+  'Itagüí',
+  'Jamundí',
+  'La Calera',
+  'La Dorada',
+  'Leticia',
+  'Los Patios',
+  'Madrid',
+  'Magangué',
+  'Maicao',
+  'Malambo',
+  'Manizales',
+  'Medellín',
+  'Melgar',
+  'Mitú',
+  'Mocoa',
+  'Montería',
+  'Mosquera',
+  'Neiva',
+  'Ocaña',
+  'Palmira',
+  'Pasto',
+  'Pereira',
+  'Piedecuesta',
+  'Pitalito',
+  'Popayán',
+  'Puerto Asís',
+  'Puerto Carreño',
+  'Quibdó',
+  'Riohacha',
+  'Rionegro',
+  'Sabaneta',
+  'Sahagún',
+  'San Andrés',
+  'San Gil',
+  'San José del Guaviare',
+  'Santa Marta',
+  'Santa Rosa de Cabal',
+  'Sincelejo',
+  'Soacha',
+  'Sogamoso',
+  'Soledad',
+  'Sopó',
+  'Tocancipá',
+  'Tuluá',
+  'Tumaco',
+  'Tunja',
+  'Turbaco',
+  'Turbo',
+  'Uribia',
+  'Valledupar',
+  'Villa del Rosario',
+  'Villavicencio',
+  'Yopal',
+  'Yumbo',
+  'Zipaquirá',
+  'Otro',
+] as const;
+
+export type ColombiaMunicipality = (typeof COLOMBIA_MUNICIPALITIES)[number];
+
+export const OTHER_LOCATION_VALUE = 'Otro' as const;
+
+// Alias y compatibilidad retrospectiva
+export const COLOMBIA_CITIES = COLOMBIA_MUNICIPALITIES;
+export const CITIES_AND_MUNICIPALITIES = COLOMBIA_MUNICIPALITIES;
+export const BOGOTA_LOCALITIES = COLOMBIA_MUNICIPALITIES;
+export type BogotaLocality = ColombiaMunicipality;
+
+/**
+ * Formato de moneda colombiana (COP)
+ * Ejemplo: formatCOP(250000) => "$ 250.000 COP"
+ */
+export function formatCOP(amount: number): string {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount) + ' COP';
+}
+
+/**
+ * Categorías principales de materiales recuperables en Colombia
+ * Basado en la normativa ambiental colombiana (Resolución 2184 de 2019 / Código de Colores)
+ */
+export const MATERIAL_CATEGORIES_COLOMBIA = [
+  { id: 'PLASTICOS', name: 'Plásticos Aprovechables', subcategories: ['PET', 'PEAD / HDPE', 'PEBD / LDPE', 'PP (Polipropileno)', 'PVC'] },
+  { id: 'METALES', name: 'Metales y Chatarra', subcategories: ['Aluminio (Latas/Perfiles)', 'Cobre', 'Bronce', 'Hierro / Chatarra ferrosa', 'Acero'] },
+  { id: 'PAPEL_CARTON', name: 'Papel y Cartón', subcategories: ['Cartón Corrugado / Ondulado', 'Papel Archivo Blanco', 'Plegadiza', 'Periódico'] },
+  { id: 'VIDRIO', name: 'Vidrio Aprovechable', subcategories: ['Vidrio Transparente', 'Vidrio Verde', 'Vidrio Ámbar'] },
+  { id: 'RAEE', name: 'Residuos Eléctricos y Electrónicos (RAEE)', subcategories: ['Equipos de Cómputo', 'Celulares y Baterías', 'Electrodomésticos'] },
+  { id: 'TEXTILES', name: 'Textiles Recuperables', subcategories: ['Retazos Industriales', 'Algodón', 'Prendas en Desuso'] },
+  { id: 'ORGANICOS', name: 'Orgánicos y Biomasa', subcategories: ['Residuos de Alimentos no Cocinados', 'Podas y Jardinería', 'Residuos Agroindustriales'] },
+] as const;
+
+// ==========================================
+// Expresión Regular para Celulares en Colombia
+// Válido para formato local 3XXXXXXXXX o internacional +57 3XXXXXXXXX
+// ==========================================
+export const COLOMBIA_PHONE_REGEX = /^(?:\+?57\s?)?3\d{2}\s?\d{3}\s?\d{4}$/;
+
+// ==========================================
+// Interfaces Base de API
+// ==========================================
+
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  message?: string;
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+    details?: unknown;
+  };
+  timestamp: string;
+}
+
+export interface HealthCheckData {
+  service: string;
+  version: string;
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  uptimeSeconds: number;
+  database: {
+    status: 'connected' | 'disconnected' | 'error';
+    latencyMs?: number;
+  };
+  environment: string;
+}
+
+// ==========================================
+// Tipos de Dominio de Usuario (Fase 2 y 4)
+// ==========================================
+
+export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+export type UserRole = 'USER' | 'ADMIN';
+export const USER_TYPES = ['GENERATOR', 'RECYCLER', 'TRANSPORTER', 'TRANSFORMER'] as const;
+export type UserType = (typeof USER_TYPES)[number];
+
+export interface SafeUserDto {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string | null;
+  userType: UserType;
+  status: UserStatus;
+  role: UserRole;
+  transportCategoryIds: string[];
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
+
+export interface DataPolicyInfoDto {
+  available: boolean;
+  url: string | null;
+  version: string;
+}
+
+export interface PublicUserDto {
+  id: string;
+  fullName: string;
+  role: UserRole;
+  userType: UserType;
+  createdAt: string;
+}
+
+export interface CreateUserInput {
+  fullName: string;
+  email: string;
+  phone?: string | null;
+  userType: UserType;
+  passwordHash: string;
+  role?: UserRole;
+}
+
+export interface UpdateUserInput {
+  fullName?: string;
+  phone?: string | null;
+}
+
+export interface AdminUpdateUserInput {
+  fullName?: string;
+  phone?: string | null;
+  userType?: UserType;
+  status?: UserStatus;
+  role?: UserRole;
+}
+
+// ==========================================
+// Esquemas de Validación con Zod (Fase 3 y 4)
+// ==========================================
+
+export const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_+=\-\[\]{}|:;<>,./~`]).{8,100}$/;
+
+export const registerSchema = z.object({
+  fullName: z
+    .string({ required_error: 'El nombre completo es requerido' })
+    .trim()
+    .min(3, 'El nombre debe tener al menos 3 caracteres')
+    .max(150, 'El nombre no puede exceder 150 caracteres'),
+  email: z
+    .string({ required_error: 'El correo electrónico es requerido' })
+    .trim()
+    .toLowerCase()
+    .email('Formato de correo electrónico inválido')
+    .max(255, 'El correo no puede exceder 255 caracteres'),
+  password: z
+    .string({ required_error: 'La contraseña es requerida' })
+    .min(8, 'La contraseña debe tener al menos 8 caracteres')
+    .max(100, 'La contraseña no puede exceder 100 caracteres')
+    .regex(
+      PASSWORD_REGEX,
+      'La contraseña debe incluir al menos una letra mayúscula, una minúscula, un número y un carácter especial'
+    ),
+  phone: z
+    .string()
+    .trim()
+    .max(30, 'El teléfono no puede exceder 30 caracteres')
+    .optional()
+    .nullable(),
+  userType: z.enum(USER_TYPES, {
+    required_error: 'El tipo de usuario es requerido',
+    invalid_type_error: 'Selecciona un tipo de usuario válido',
+  }),
+  dataPolicyAccepted: z
+    .boolean({ required_error: 'Debes aceptar el tratamiento de datos personales' })
+    .refine((accepted) => accepted, 'Debes aceptar el tratamiento de datos personales'),
+});
+
+export type RegisterDto = z.infer<typeof registerSchema>;
+
+export const loginSchema = z.object({
+  email: z
+    .string({ required_error: 'El correo electrónico es requerido' })
+    .trim()
+    .toLowerCase()
+    .email('Formato de correo electrónico inválido'),
+  password: z
+    .string({ required_error: 'La contraseña es requerida' })
+    .min(1, 'La contraseña es requerida'),
+});
+
+export type LoginDto = z.infer<typeof loginSchema>;
+
+export const refreshTokenSchema = z.object({
+  refreshToken: z
+    .string({ required_error: 'El token de actualización es requerido' })
+    .min(10, 'Token de actualización inválido'),
+});
+
+export type RefreshTokenDto = z.infer<typeof refreshTokenSchema>;
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: string;
+}
+
+export interface AuthResponseDto {
+  user: SafeUserDto;
+  tokens: AuthTokens;
+}
+
+export const updateProfileSchema = z.object({
+  fullName: z
+    .string()
+    .trim()
+    .min(3, 'El nombre debe tener al menos 3 caracteres')
+    .max(150, 'El nombre no puede exceder 150 caracteres')
+    .optional(),
+  phone: z
+    .string()
+    .trim()
+    .max(30, 'El teléfono no puede exceder 30 caracteres')
+    .optional()
+    .nullable(),
+  transportCategoryIds: z
+    .array(z.string().uuid())
+    .max(100)
+    .refine((ids) => new Set(ids).size === ids.length, 'No repitas materiales seleccionados')
+    .optional(),
+});
+
+export type UpdateProfileDto = z.infer<typeof updateProfileSchema>;
+
+export const adminUpdateUserSchema = z.object({
+  fullName: z
+    .string()
+    .trim()
+    .min(3)
+    .max(150)
+    .optional(),
+  phone: z
+    .string()
+    .trim()
+    .max(30)
+    .optional()
+    .nullable(),
+  status: z
+    .enum(['ACTIVE', 'INACTIVE', 'SUSPENDED'] as const)
+    .optional(),
+  role: z
+    .enum(['USER', 'ADMIN'] as const)
+    .optional(),
+  userType: z.enum(USER_TYPES).optional(),
+});
+
+export type AdminUpdateUserDto = z.infer<typeof adminUpdateUserSchema>;
+
+export const adminCreateUserSchema = registerSchema.omit({ dataPolicyAccepted: true }).extend({
+  role: z.enum(['USER', 'ADMIN'] as const).optional(),
+});
+
+export type AdminCreateUserDto = z.infer<typeof adminCreateUserSchema>;
+
+// ==========================================
+// Entidades y DTOs de Organizaciones (Fase 7)
+// ==========================================
+
+export const ORGANIZATION_TYPES = [
+  'COMPANY',      // Empresa (S.A.S., S.A., Ltda., etc.)
+  'ASSOCIATION',  // Asociación de recicladores de oficio
+  'FOUNDATION',   // Fundación (ej. Fundación IMARA)
+  'COOPERATIVE',  // Cooperativa de reciclaje y trabajo asociado
+  'INSTITUTION',  // Entidad pública / municipal (ej. UAESP, Alcaldía)
+] as const;
+export type OrganizationType = (typeof ORGANIZATION_TYPES)[number];
+
+export const ORGANIZATION_STATUSES = ['ACTIVE', 'INACTIVE', 'SUSPENDED'] as const;
+export type OrganizationStatus = (typeof ORGANIZATION_STATUSES)[number];
+
+export const VERIFICATION_STATUSES = ['UNVERIFIED', 'PENDING', 'VERIFIED', 'REJECTED'] as const;
+export type VerificationStatus = (typeof VERIFICATION_STATUSES)[number];
+
+export const MEMBERSHIP_STATUSES = ['ACTIVE', 'INVITED', 'INACTIVE'] as const;
+export type MembershipStatus = (typeof MEMBERSHIP_STATUSES)[number];
+
+export const ORG_ROLE_NAMES = ['OWNER', 'ADMIN', 'MEMBER', 'OPERATOR'] as const;
+export type OrgRoleName = (typeof ORG_ROLE_NAMES)[number];
+
+export interface PermissionDto {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  module: string;
+}
+
+export interface RoleDto {
+  id: string;
+  organizationId: string | null;
+  name: string;
+  description: string | null;
+  isSystem: boolean;
+  permissions: PermissionDto[];
+}
+
+export interface OrganizationMemberDto {
+  id: string;
+  organizationId: string;
+  userId: string;
+  roleId: string;
+  status: MembershipStatus;
+  joinedAt: string;
+  user: {
+    id: string;
+    fullName: string;
+    email: string;
+    phone: string | null;
+  };
+  role: {
+    id: string;
+    name: string;
+    description: string | null;
+  };
+}
+
+export interface OrganizationDto {
+  id: string;
+  name: string;
+  legalName: string | null;
+  taxId: string | null;
+  orgType: OrganizationType;
+  activityType: UserType;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  locality: string | null;
+  city: string;
+  status: OrganizationStatus;
+  verificationStatus: VerificationStatus;
+  verifiedAt: string | null;
+  verificationNotes: string | null;
+  certificateUrl: string | null;
+  materialCategoryIds: string[];
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  membersCount?: number;
+  userRole?: string; // Rol del usuario autenticado en esta organización
+}
+
+// ==========================================
+// Esquemas de Validación con Zod (Fase 7)
+// ==========================================
+
+export const createOrganizationSchema = z.object({
+  name: z
+    .string({ required_error: 'El nombre comercial es requerido' })
+    .trim()
+    .min(3, 'El nombre debe tener al menos 3 caracteres')
+    .max(150, 'El nombre no puede exceder 150 caracteres'),
+  legalName: z
+    .string()
+    .trim()
+    .min(3, 'La razón social debe tener al menos 3 caracteres')
+    .max(200, 'La razón social no puede exceder 200 caracteres')
+    .optional()
+    .nullable(),
+  taxId: z
+    .string()
+    .trim()
+    .min(5, 'El NIT debe tener al menos 5 caracteres')
+    .max(50, 'El NIT no puede exceder 50 caracteres')
+    .regex(/^[0-9.-]+$/, 'El NIT solo puede contener números, puntos y guiones')
+    .optional()
+    .nullable(),
+  orgType: z.enum(ORGANIZATION_TYPES, {
+    invalid_type_error: 'Tipo de organización inválido',
+  }).default('COMPANY'),
+  activityType: z.enum(USER_TYPES, {
+    invalid_type_error: 'Tipo de actividad circular inválido',
+  }).default('GENERATOR'),
+  materialCategoryIds: z
+    .array(z.string().uuid('El ID de categoría debe ser un UUID válido'))
+    .max(100)
+    .refine((ids) => new Set(ids).size === ids.length, 'No repitas materiales seleccionados')
+    .optional()
+    .default([]),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .email('Correo electrónico corporativo inválido')
+    .optional()
+    .nullable(),
+  phone: z
+    .string()
+    .trim()
+    .max(30, 'El teléfono no puede exceder 30 caracteres')
+    .optional()
+    .nullable(),
+  address: z
+    .string()
+    .trim()
+    .max(255, 'La dirección no puede exceder 255 caracteres')
+    .optional()
+    .nullable(),
+  locality: z
+    .string()
+    .trim()
+    .min(2, 'La ciudad, municipio o país debe tener al menos 2 caracteres')
+    .max(100, 'La ciudad, municipio o país no puede exceder 100 caracteres')
+    .optional()
+    .nullable(),
+  city: z
+    .string()
+    .trim()
+    .default('Colombia'),
+});
+
+export type CreateOrganizationInput = z.infer<typeof createOrganizationSchema>;
+
+export const updateOrganizationSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(3, 'El nombre debe tener al menos 3 caracteres')
+    .max(150, 'El nombre no puede exceder 150 caracteres')
+    .optional(),
+  legalName: z
+    .string()
+    .trim()
+    .min(3, 'La razón social debe tener al menos 3 caracteres')
+    .max(200, 'La razón social no puede exceder 200 caracteres')
+    .optional()
+    .nullable(),
+  taxId: z
+    .string()
+    .trim()
+    .min(5, 'El NIT debe tener al menos 5 caracteres')
+    .max(50, 'El NIT no puede exceder 50 caracteres')
+    .regex(/^[0-9.-]+$/, 'El NIT solo puede contener números, puntos y guiones')
+    .optional()
+    .nullable(),
+  orgType: z.enum(ORGANIZATION_TYPES).optional(),
+  activityType: z.enum(USER_TYPES).optional(),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .email('Correo electrónico corporativo inválido')
+    .optional()
+    .nullable(),
+  phone: z
+    .string()
+    .trim()
+    .max(30, 'El teléfono no puede exceder 30 caracteres')
+    .optional()
+    .nullable(),
+  address: z
+    .string()
+    .trim()
+    .max(255, 'La dirección no puede exceder 255 caracteres')
+    .optional()
+    .nullable(),
+  locality: z
+    .string()
+    .trim()
+    .min(2, 'La ciudad, municipio o país debe tener al menos 2 caracteres')
+    .max(100, 'La ciudad, municipio o país no puede exceder 100 caracteres')
+    .optional()
+    .nullable(),
+  city: z
+    .string()
+    .trim()
+    .optional(),
+  materialCategoryIds: z
+    .array(z.string().uuid('Cada categoría debe ser un UUID válido'))
+    .optional(),
+});
+
+export type UpdateOrganizationInput = z.infer<typeof updateOrganizationSchema>;
+
+export const addMemberSchema = z.object({
+  email: z
+    .string({ required_error: 'El correo electrónico del miembro es requerido' })
+    .trim()
+    .toLowerCase()
+    .email('Formato de correo electrónico inválido'),
+  roleName: z
+    .enum(ORG_ROLE_NAMES, {
+      required_error: 'El rol en la organización es requerido',
+      invalid_type_error: 'Rol de organización inválido (OWNER, ADMIN, MEMBER, OPERATOR)',
+    })
+    .default('MEMBER'),
+});
+
+export type AddMemberInput = z.infer<typeof addMemberSchema>;
+
+export const updateMemberRoleSchema = z.object({
+  roleName: z.enum(ORG_ROLE_NAMES, {
+    required_error: 'El rol en la organización es requerido',
+  }),
+  status: z.enum(MEMBERSHIP_STATUSES).optional(),
+});
+
+export type UpdateMemberRoleInput = z.infer<typeof updateMemberRoleSchema>;
+
+export const requestVerificationSchema = z.object({
+  notes: z
+    .string()
+    .trim()
+    .max(500, 'Las notas de verificación no pueden exceder 500 caracteres')
+    .optional(),
+  certificateUrl: z
+    .string()
+    .trim()
+    .url('Debe ser una URL válida')
+    .optional()
+    .nullable(),
+});
+
+export type RequestVerificationInput = z.infer<typeof requestVerificationSchema>;
+
+export const reviewVerificationSchema = z.object({
+  status: z.enum(['VERIFIED', 'REJECTED'] as const, {
+    required_error: 'El estado de revisión debe ser VERIFIED o REJECTED',
+  }),
+  notes: z
+    .string()
+    .trim()
+    .max(500, 'Las notas no pueden exceder 500 caracteres')
+    .optional(),
+});
+
+export type ReviewVerificationInput = z.infer<typeof reviewVerificationSchema>;
+
+// ==========================================
+// Catálogo de Materiales y Publicaciones (Fase 8)
+// ==========================================
+
+export const PUBLICATION_TYPES = ['OFFER', 'NEED'] as const;
+export type PublicationType = (typeof PUBLICATION_TYPES)[number];
+
+export const PUBLICATION_STATUSES = ['ACTIVE', 'PAUSED', 'CLOSED', 'EXPIRED'] as const;
+export type PublicationStatus = (typeof PUBLICATION_STATUSES)[number];
+
+export interface MaterialCategoryDto {
+  id: string;
+  name: string;
+  description: string | null;
+  parentId: string | null;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+  parent?: {
+    id: string;
+    name: string;
+  } | null;
+  subcategories?: MaterialCategoryDto[];
+}
+
+export interface UnitDto {
+  id: string;
+  name: string;
+  abbreviation: string;
+  active: boolean;
+}
+
+export interface MaterialPublicationDto {
+  id: string;
+  type: PublicationType;
+  ownerUserId: string;
+  organizationId: string | null;
+  categoryId: string;
+  quantity: number;
+  unitId: string;
+  description: string | null;
+  requiresTransport: boolean;
+  locationAddress: string;
+  locationCity: string | null;
+  locationArea: string | null;
+  condition: string | null;
+  photoUrl: string | null;
+  isUrgent: boolean;
+  status: PublicationStatus;
+  expiresAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  ownerUser?: {
+    id: string;
+    fullName: string;
+  };
+  organization?: {
+    id: string;
+    name: string;
+    legalName: string | null;
+  } | null;
+  category?: MaterialCategoryDto;
+  unit?: UnitDto;
+  publicacionesCompatibles?: number;
+  isMatchParticipant?: boolean;
+}
+
+// Esquemas Zod para Catálogo
+export const createCategorySchema = z.object({
+  name: z
+    .string({ required_error: 'El nombre de la categoría es requerido' })
+    .trim()
+    .min(2, 'El nombre debe tener al menos 2 caracteres')
+    .max(100, 'El nombre no puede exceder 100 caracteres'),
+  description: z
+    .string()
+    .trim()
+    .max(255, 'La descripción no puede exceder 255 caracteres')
+    .optional()
+    .nullable(),
+  parentId: z
+    .string()
+    .uuid('El parentId debe ser un UUID válido')
+    .optional()
+    .nullable(),
+  active: z.boolean().default(true).optional(),
+});
+
+export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
+
+export const updateCategorySchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, 'El nombre debe tener al menos 2 caracteres')
+    .max(100, 'El nombre no puede exceder 100 caracteres')
+    .optional(),
+  description: z
+    .string()
+    .trim()
+    .max(255, 'La descripción no puede exceder 255 caracteres')
+    .optional()
+    .nullable(),
+  parentId: z
+    .string()
+    .uuid('El parentId debe ser un UUID válido')
+    .optional()
+    .nullable(),
+  active: z.boolean().optional(),
+});
+
+export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;
+
+const publicationPhotoUrlSchema = z
+  .string()
+  .trim()
+  .max(3_000_000, 'La imagen no puede superar 2 MB')
+  .refine(
+    (value) =>
+      z.string().url().safeParse(value).success ||
+      /^data:image\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/]+={0,2}$/.test(value),
+    'La imagen debe ser una URL válida o una imagen local codificada'
+  );
+
+export const createUnitSchema = z.object({
+  name: z
+    .string({ required_error: 'El nombre de la unidad es requerido' })
+    .trim()
+    .min(2, 'El nombre debe tener al menos 2 caracteres')
+    .max(50, 'El nombre no puede exceder 50 caracteres'),
+  abbreviation: z
+    .string({ required_error: 'La abreviatura es requerida' })
+    .trim()
+    .min(1, 'La abreviatura debe tener al menos 1 carácter')
+    .max(10, 'La abreviatura no puede exceder 10 caracteres'),
+  active: z.boolean().default(true).optional(),
+});
+
+export type CreateUnitInput = z.infer<typeof createUnitSchema>;
+
+export const updateUnitSchema = z.object({
+  name: z.string().trim().min(2).max(50).optional(),
+  abbreviation: z.string().trim().min(1).max(10).optional(),
+  active: z.boolean().optional(),
+});
+
+export type UpdateUnitInput = z.infer<typeof updateUnitSchema>;
+
+// Esquemas Zod para Publicaciones
+export const createPublicationSchema = z.object({
+  type: z.enum(PUBLICATION_TYPES, {
+    required_error: 'El tipo de publicación es requerido (OFFER o NEED)',
+  }),
+  organizationId: z
+    .string()
+    .uuid('El ID de organización debe ser un UUID válido')
+    .optional()
+    .nullable(),
+  categoryId: z
+    .string({ required_error: 'La subcategoría de material es requerida' })
+    .uuid('El ID de categoría debe ser un UUID válido'),
+  quantity: z
+    .number({ required_error: 'La cantidad es requerida' })
+    .positive('La cantidad debe ser mayor a cero'),
+  unitId: z
+    .string({ required_error: 'La unidad de medida es requerida' })
+    .uuid('El ID de unidad debe ser un UUID válido'),
+  description: z
+    .string()
+    .trim()
+    .max(1000, 'La descripción no puede exceder 1000 caracteres')
+    .optional()
+    .nullable(),
+  requiresTransport: z.boolean().default(false).optional(),
+  locationAddress: z
+    .string({ required_error: 'La dirección de ubicación es requerida' })
+    .trim()
+    .min(5, 'La dirección debe tener al menos 5 caracteres')
+    .max(255, 'La dirección no puede exceder 255 caracteres'),
+  locationCity: z
+    .string()
+    .trim()
+    .min(2)
+    .max(100)
+    .default('Bogotá D.C.')
+    .optional(),
+  locationArea: z
+    .string()
+    .trim()
+    .min(2)
+    .max(100)
+    .optional()
+    .nullable(),
+  condition: z
+    .string()
+    .trim()
+    .max(100, 'La condición no puede exceder 100 caracteres')
+    .optional()
+    .nullable(),
+  photoUrl: publicationPhotoUrlSchema.optional().nullable(),
+  isUrgent: z.boolean().default(false).optional(),
+  expiresAt: z
+    .string()
+    .datetime({ message: 'La fecha de expiración debe tener formato ISO 8601' })
+    .optional()
+    .nullable(),
+});
+
+export type CreatePublicationInput = z.infer<typeof createPublicationSchema>;
+
+export const updatePublicationSchema = z.object({
+  quantity: z
+    .number()
+    .positive('La cantidad debe ser mayor a cero')
+    .optional(),
+  unitId: z
+    .string()
+    .uuid('El ID de unidad debe ser un UUID válido')
+    .optional(),
+  description: z
+    .string()
+    .trim()
+    .max(1000, 'La descripción no puede exceder 1000 caracteres')
+    .optional()
+    .nullable(),
+  requiresTransport: z.boolean().optional(),
+  locationAddress: z
+    .string()
+    .trim()
+    .min(5, 'La dirección debe tener al menos 5 caracteres')
+    .max(255, 'La dirección no puede exceder 255 caracteres')
+    .optional(),
+  locationCity: z
+    .string()
+    .trim()
+    .min(2)
+    .max(100)
+    .optional(),
+  locationArea: z
+    .string()
+    .trim()
+    .min(2)
+    .max(100)
+    .optional()
+    .nullable(),
+  condition: z
+    .string()
+    .trim()
+    .max(100)
+    .optional()
+    .nullable(),
+  photoUrl: publicationPhotoUrlSchema.optional().nullable(),
+  isUrgent: z.boolean().optional(),
+  status: z.enum(PUBLICATION_STATUSES).optional(),
+  expiresAt: z
+    .string()
+    .datetime({ message: 'La fecha de expiración debe tener formato ISO 8601' })
+    .optional()
+    .nullable(),
+});
+
+export type UpdatePublicationInput = z.infer<typeof updatePublicationSchema>;
+
+// ==========================================
+// FASE 9: BÚSQUEDA, FILTROS Y COINCIDENCIAS
+// ==========================================
+
+export const PUBLICATION_SORT_OPTIONS = ['recent', 'urgent_first'] as const;
+export type PublicationSortOption = (typeof PUBLICATION_SORT_OPTIONS)[number];
+
+export const searchPublicationsQuerySchema = z.object({
+  type: z.enum(PUBLICATION_TYPES).optional(),
+  categoryId: z.string().uuid('El ID de categoría debe ser un UUID válido').optional(),
+  city: z.string().trim().optional(),
+  area: z.string().trim().optional(),
+  minQuantity: z.coerce.number().min(0, 'La cantidad mínima no puede ser negativa').optional(),
+  maxQuantity: z.coerce.number().min(0, 'La cantidad máxima no puede ser negativa').optional(),
+  unitId: z.string().uuid('El ID de unidad debe ser un UUID válido').optional(),
+  isUrgent: z
+    .union([z.boolean(), z.enum(['true', 'false'])])
+    .transform((v) => (typeof v === 'boolean' ? v : v === 'true'))
+    .optional(),
+  status: z.enum(PUBLICATION_STATUSES).optional(),
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  pageSize: z.coerce.number().int().min(1).max(50).default(20).optional(),
+  sortBy: z.enum(PUBLICATION_SORT_OPTIONS).default('recent').optional(),
+});
+
+export type SearchPublicationsQuery = z.infer<typeof searchPublicationsQuerySchema>;
+
+export interface PublicationSearchResultDto {
+  data: MaterialPublicationDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface PublicationMatchDto {
+  publicationId: string;
+  score: number;
+  factors: string[];
+  publication?: MaterialPublicationDto;
+}
+
+export interface MySuggestionsItemDto {
+  publicationId: string;
+  publication: MaterialPublicationDto;
+  matches: PublicationMatchDto[];
+}
+
+// ==========================================
+// FASE 10: CONVERSACIONES, MENSAJES Y PROPUESTAS
+// ==========================================
+
+export const CONVERSATION_STATUSES = ['OPEN', 'ARCHIVED', 'BLOCKED'] as const;
+export type ConversationStatus = (typeof CONVERSATION_STATUSES)[number];
+
+export const MESSAGE_TYPES = ['TEXT', 'SYSTEM'] as const;
+export type MessageType = (typeof MESSAGE_TYPES)[number];
+
+export const PROPOSAL_STATUSES = ['PENDING', 'ACCEPTED', 'REJECTED', 'SUPERSEDED'] as const;
+export type ProposalStatus = (typeof PROPOSAL_STATUSES)[number];
+
+export interface CounterpartSummaryDto {
+  userId: string;
+  displayName: string;
+  organizationId?: string | null;
+  organizationName?: string | null;
+  verificationStatus?: VerificationStatus;
+}
+
+export interface MessageDto {
+  id: string;
+  conversationId: string;
+  senderUserId: string | null;
+  senderDisplayName?: string;
+  senderIsOrganization?: boolean;
+  body: string;
+  type: MessageType;
+  metadata?: Record<string, unknown> | null;
+  createdAt: string;
+  isMine?: boolean;
+}
+
+export interface ProposalDto {
+  id: string;
+  conversationId: string;
+  publicationId: string;
+  proposerUserId: string;
+  proposerOrganizationId: string | null;
+  proposerDisplayName?: string;
+  quantity: number;
+  unitId: string;
+  unitName?: string;
+  unitAbbreviation?: string;
+  terms: string;
+  status: ProposalStatus;
+  parentProposalId: string | null;
+  respondedByUserId: string | null;
+  respondedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  isMine?: boolean;
+}
+
+export interface ConversationPublicationSummaryDto {
+  id: string;
+  type: PublicationType;
+  categoryId: string;
+  categoryName?: string;
+  quantity: number;
+  unitId: string;
+  unitName?: string;
+  unitAbbreviation?: string;
+  locationAddress: string;
+  locationCity?: string | null;
+  locationArea?: string | null;
+  photoUrl?: string | null;
+  status: PublicationStatus;
+}
+
+export interface ConversationDto {
+  id: string;
+  publicationId: string;
+  initiatorUserId: string;
+  initiatorOrganizationId: string | null;
+  counterpartUserId: string;
+  counterpartOrganizationId: string | null;
+  status: ConversationStatus;
+  lastMessageAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  unreadCount?: number;
+  isArchived?: boolean;
+  publication?: ConversationPublicationSummaryDto;
+  counterpart?: CounterpartSummaryDto;
+  lastMessage?: MessageDto | null;
+  currentProposal?: ProposalDto | null;
+}
+
+// Esquemas Zod para Fase 10
+export const startConversationSchema = z.object({
+  publicationId: z.string().uuid('El ID de publicación debe ser un UUID válido'),
+  organizationId: z.string().uuid('El ID de organización debe ser un UUID válido').optional().nullable(),
+  initialMessage: z
+    .string()
+    .trim()
+    .min(1, 'El mensaje inicial no puede estar vacío')
+    .max(2000, 'El mensaje no puede exceder 2000 caracteres')
+    .optional(),
+});
+export type StartConversationInput = z.infer<typeof startConversationSchema>;
+
+export const sendMessageSchema = z.object({
+  body: z
+    .string({ required_error: 'El cuerpo del mensaje es requerido' })
+    .trim()
+    .min(1, 'El mensaje no puede estar vacío')
+    .max(2000, 'El mensaje no puede exceder 2000 caracteres'),
+});
+export type SendMessageInput = z.infer<typeof sendMessageSchema>;
+
+export const createProposalSchema = z.object({
+  quantity: z
+    .number({ required_error: 'La cantidad es requerida' })
+    .positive('La cantidad debe ser mayor a cero'),
+  unitId: z
+    .string({ required_error: 'La unidad es requerida' })
+    .uuid('El ID de unidad debe ser un UUID válido'),
+  terms: z
+    .string({ required_error: 'Los términos y condiciones son requeridos' })
+    .trim()
+    .min(1, 'Los términos no pueden estar vacíos')
+    .max(2000, 'Los términos no pueden exceder 2000 caracteres'),
+  parentProposalId: z
+    .string()
+    .uuid('El ID de propuesta previa debe ser un UUID válido')
+    .optional()
+    .nullable(),
+  organizationId: z
+    .string()
+    .uuid('El ID de organización debe ser un UUID válido')
+    .optional()
+    .nullable(),
+});
+export type CreateProposalInput = z.infer<typeof createProposalSchema>;
+
+export const getConversationsQuerySchema = z.object({
+  status: z.enum(CONVERSATION_STATUSES).optional(),
+  archived: z
+    .union([z.boolean(), z.enum(['true', 'false'])])
+    .transform((v) => (typeof v === 'boolean' ? v : v === 'true'))
+    .optional(),
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  pageSize: z.coerce.number().int().min(1).max(50).default(20).optional(),
+});
+export type GetConversationsQuery = z.infer<typeof getConversationsQuerySchema>;
+
+export const getMessagesQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  pageSize: z.coerce.number().int().min(1).max(100).default(50).optional(),
+});
+export type GetMessagesQuery = z.infer<typeof getMessagesQuerySchema>;
+
+// ==========================================
+// FASE 11: OPERACIONES Y LOGÍSTICA
+// ==========================================
+
+export const OPERATION_STATUSES = [
+  'ACCEPTED',
+  'SCHEDULED',
+  'COLLECTING',
+  'EVIDENCE',
+  'RECEIVED',
+  'CLOSED',
+  'CANCELLED',
+] as const;
+export type OperationStatus = (typeof OPERATION_STATUSES)[number];
+
+export const EVIDENCE_TYPES = [
+  'WEIGHING_TICKET',
+  'PHOTO',
+  'SIGNATURE',
+  'DOCUMENT',
+] as const;
+export type EvidenceType = (typeof EVIDENCE_TYPES)[number];
+
+export interface OperationEvidenceDto {
+  id: string;
+  operationId: string;
+  type: EvidenceType;
+  fileUrl: string;
+  description?: string | null;
+  weightKg?: number | null;
+  uploadedByUserId: string;
+  uploadedByName?: string;
+  createdAt: string;
+}
+
+export interface OperationTimelineStepDto {
+  stage: OperationStatus;
+  label: string;
+  description: string;
+  completedAt?: string | null;
+  isDone: boolean;
+  isActive: boolean;
+}
+
+export interface OperationPartySummaryDto {
+  userId: string;
+  displayName: string;
+  phone?: string | null;
+  organizationId?: string | null;
+  organizationName?: string | null;
+  userType?: UserType;
+}
+
+export interface OperationDto {
+  id: string;
+  code: string;
+  proposalId: string;
+  publicationId: string;
+  sellerUserId: string;
+  sellerOrganizationId: string | null;
+  seller?: OperationPartySummaryDto;
+  buyerUserId: string;
+  buyerOrganizationId: string | null;
+  buyer?: OperationPartySummaryDto;
+  transporterUserId: string | null;
+  transporterOrganizationId: string | null;
+  transporter?: OperationPartySummaryDto | null;
+  materialCategoryId: string;
+  materialCategoryName?: string;
+  quantity: number;
+  unitId: string;
+  unitName?: string;
+  unitAbbreviation?: string;
+  agreedPriceCop: number | null;
+  status: OperationStatus;
+  scheduledDate: string | null;
+  scheduledTimeSlot: string | null;
+  pickupAddress: string | null;
+  pickupCity: string | null;
+  pickupArea: string | null;
+  deliveryAddress: string | null;
+  deliveryCity: string | null;
+  deliveryArea: string | null;
+  transportNotes: string | null;
+  vehiclePlate: string | null;
+  driverName: string | null;
+  actualWeight: number | null;
+  receivedNotes: string | null;
+  closedAt: string | null;
+  cancelledAt: string | null;
+  cancellationReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+  evidences?: OperationEvidenceDto[];
+  reviews?: OperationReviewDto[];
+  timeline?: OperationTimelineStepDto[];
+}
+
+export const createOperationSchema = z.object({
+  proposalId: z.string().uuid('El ID de propuesta debe ser un UUID válido'),
+  pickupAddress: z.string().trim().max(255).optional(),
+  pickupArea: z.string().trim().max(100).optional(),
+  deliveryAddress: z.string().trim().max(255).optional(),
+  deliveryArea: z.string().trim().max(100).optional(),
+});
+export type CreateOperationInput = z.infer<typeof createOperationSchema>;
+
+export const scheduleOperationSchema = z.object({
+  scheduledDate: z.string().datetime({ message: 'La fecha programada debe ser un formato ISO válido' }),
+  scheduledTimeSlot: z.string().trim().max(50).optional(),
+  pickupAddress: z.string().trim().min(3, 'La dirección de recolección es requerida').max(255),
+  pickupArea: z.string().trim().min(2, 'La ciudad o municipio de recolección es requerido').max(100),
+  deliveryAddress: z.string().trim().max(255).optional(),
+  deliveryArea: z.string().trim().max(100).optional(),
+  transporterUserId: z.string().uuid().optional().nullable(),
+  vehiclePlate: z.string().trim().max(20).optional(),
+  driverName: z.string().trim().max(100).optional(),
+  transportNotes: z.string().trim().max(1000).optional(),
+});
+export type ScheduleOperationInput = z.infer<typeof scheduleOperationSchema>;
+
+export const addEvidenceSchema = z.object({
+  type: z.enum(EVIDENCE_TYPES, { required_error: 'El tipo de evidencia es requerido' }),
+  fileUrl: z.string().url('La URL de la evidencia debe ser válida'),
+  description: z.string().trim().max(500).optional(),
+  weightKg: z.number().positive('El peso en báscula debe ser mayor a cero').optional().nullable(),
+});
+export type AddEvidenceInput = z.infer<typeof addEvidenceSchema>;
+
+export const receiveOperationSchema = z.object({
+  receivedNotes: z.string().trim().max(1000).optional(),
+  actualReceivedQuantity: z.number().positive().optional(),
+});
+export type ReceiveOperationInput = z.infer<typeof receiveOperationSchema>;
+
+export const closeOperationSchema = z.object({
+  closingNotes: z.string().trim().max(1000).optional(),
+});
+export type CloseOperationInput = z.infer<typeof closeOperationSchema>;
+
+export const cancelOperationSchema = z.object({
+  reason: z.string().trim().min(3, 'El motivo de cancelación es obligatorio').max(500),
+});
+export type CancelOperationInput = z.infer<typeof cancelOperationSchema>;
+
+export const getOperationsQuerySchema = z.object({
+  status: z.enum(OPERATION_STATUSES).optional(),
+  role: z.enum(['seller', 'buyer', 'transporter', 'any']).optional(),
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  pageSize: z.coerce.number().int().min(1).max(50).default(20).optional(),
+});
+export type GetOperationsQuery = z.infer<typeof getOperationsQuerySchema>;
+
+// ==========================================
+// FASE 12: EVALUACIONES, ADMINISTRACIÓN Y REPORTES
+// ==========================================
+
+export interface OperationReviewDto {
+  id: string;
+  operationId: string;
+  reviewerUserId: string;
+  reviewerDisplayName?: string;
+  targetUserId: string;
+  targetDisplayName?: string;
+  score: number;
+  punctualityScore?: number | null;
+  materialQualityScore?: number | null;
+  fulfillmentScore?: number | null;
+  comment?: string | null;
+  createdAt: string;
+}
+
+export interface UserReviewSummaryDto {
+  userId: string;
+  averageScore: number;
+  totalReviews: number;
+  scoreBreakdown?: {
+    punctualityAverage?: number | null;
+    materialQualityAverage?: number | null;
+    fulfillmentAverage?: number | null;
+  };
+}
+
+export const createReviewSchema = z.object({
+  score: z.number().int().min(1, 'La calificación mínima es 1').max(5, 'La calificación máxima es 5'),
+  punctualityScore: z.number().int().min(1).max(5).optional(),
+  materialQualityScore: z.number().int().min(1).max(5).optional(),
+  fulfillmentScore: z.number().int().min(1).max(5).optional(),
+  comment: z.string().trim().max(1000).optional(),
+});
+export type CreateReviewInput = z.infer<typeof createReviewSchema>;
+
+export interface CircularKpisDto {
+  tonsRecoveredTotal: number;
+  tonsRecoveredThisMonth: number;
+  activeMatchesCount: number;
+  verifiedOrganizationsCount: number;
+  totalOperationsCount: number;
+  closedOperationsCount: number;
+  averageSatisfaction: number;
+}
+
+// ==========================================
+// MÉTRICAS DE USUARIOS, CONEXIÓN Y VISITAS (ANALÍTICA ADMINISTRATIVA)
+// ==========================================
+
+export interface UserMetricsDto {
+  totalUsers: number;
+  activeUsers: number;
+  inactiveUsers: number;
+  suspendedUsers: number;
+  newUsersThisMonth: number;
+  usersByType: {
+    generator: number;
+    recycler: number;
+    transporter: number;
+    transformer: number;
+  };
+  usersByRole: {
+    user: number;
+    admin: number;
+  };
+  activeUsersPercentage: number;
+  newUsersGrowthPercentage: number;
+}
+
+export interface ConnectionMetricsDto {
+  databaseLatencyMs: number;
+  uptimeSeconds: number;
+  totalRequests: number;
+  successfulRequests: number;
+  failedRequests: number;
+  successRatePercentage: number;
+  activeConnections: number;
+  peakConnectionHour: string;
+  peakConnectionsCount: number;
+  averageLatencyMs: number;
+  databaseStatus: 'connected' | 'degraded' | 'disconnected';
+  environment: string;
+}
+
+export interface UserVisitMetricsDto {
+  totalVisitsCount: number;
+  averageSessionDurationMinutes: number;
+  activeSessionsCount: number;
+  closedSessionsCount: number;
+  bounceRatePercentage: number;
+  averageRequestsPerSession: number;
+  lastVisitTimestamp: string | null;
+}
+
+export interface ConnectionSuggestionDto {
+  id: string;
+  title: string;
+  category: 'performance' | 'reliability' | 'scalability' | 'engagement';
+  description: string;
+  currentStatus: string;
+  recommendation: string;
+  impact: 'HIGH' | 'MEDIUM' | 'LOW';
+}
+
+export interface AdminAnalyticsSummaryDto {
+  circularKpis: CircularKpisDto;
+  userMetrics: UserMetricsDto;
+  connectionMetrics: ConnectionMetricsDto;
+  visitMetrics: UserVisitMetricsDto;
+  suggestions: ConnectionSuggestionDto[];
+}
+
+export interface LocalityMetricsDto {
+  locality: string; // Ciudad o Municipio
+  operationsCount: number;
+  tonsRecovered: number;
+  verifiedOrganizationsCount: number;
+}
+
+export type MunicipalityMetricsDto = LocalityMetricsDto;
+
+export interface MaterialSummaryDto {
+  categoryId: string;
+  categoryName: string;
+  totalKilogramsOffered: number;
+  totalKilogramsRecovered: number;
+  operationsCount: number;
+  percentageOfTotal: number;
+}
+
+export const adminOperationsQuerySchema = z.object({
+  status: z.enum(OPERATION_STATUSES).optional(),
+  locality: z.string().optional(),
+  dateFrom: z.string().optional(),
+  dateTo: z.string().optional(),
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  pageSize: z.coerce.number().int().min(1).max(100).default(20).optional(),
+});
+export type AdminOperationsQuery = z.infer<typeof adminOperationsQuerySchema>;
+
+// Re-exportar Textos Legales Versionados (Bloque C1 y C2) y Verificaciones
+export * from './content/legal-es';
+export * from './verification';
+
+

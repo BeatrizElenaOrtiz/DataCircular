@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-11-06T15:21:00.205Z",
+  "participantes": [
+    {
+      "usuario": "GeneradorPrueba1",
+      "email": "generador1.prueba@datacircular.local",
+      "id": "70efd92d-8874-472d-97c2-573fcb5768fd",
+      "estadoLogin": "200 OK"
+    },
+    {
+      "usuario": "RecicladorPrueba1",
+      "email": "reciclador1.prueba@datacircular.local",
+      "id": "cbf024d2-8455-4efa-b613-0cda1e9c0650",
+      "estadoLogin": "200 OK"
+    },
+    {
+      "usuario": "TransportadorPrueba1",
+      "email": "transportador1.prueba@datacircular.local",
+      "id": "985891cf-f02e-4a01-b7f2-2ea95ffa8952",
+      "estadoLogin": "200 OK"
+    },
+    {
+      "usuario": "VerificadorPrueba1",
+      "email": "verificador1.prueba@datacircular.local",
+      "id": "2b454015-9fb7-481a-8cd0-1800a90c590e",
+      "estadoLogin": "200 OK"
+    }
+  ]
+}

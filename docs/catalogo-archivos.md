@@ -1,0 +1,721 @@
+# Catálogo y Documentación Técnica Paso a Paso - DATA_CIRCULAR
+
+Este documento constituye el **Manual Técnico Exhaustivo** del proyecto **DATA_CIRCULAR**, desarrollado para la **Fundación IMARA** (Bogotá D.C., Colombia).
+Describe cada archivo del repositorio paso a paso, su propósito, responsabilidades únicas, componentes, contratos, flujo de ejecución, consideraciones de seguridad y buenas prácticas de ingeniería de software aplicadas.
+
+---
+
+## 1. Ficha Técnica General del Sistema
+
+- **Nombre del Proyecto**: DATA_CIRCULAR
+- **Organización Beneficiaria**: Fundación IMARA
+- **Ámbito Territorial**: Colombia (Cobertura Nacional - Ciudades y Municipios)
+- **Moneda de Operación**: Peso Colombiano (COP, `$`)
+- **Marco Legal de Datos**: Ley Estatutaria 1581 de 2012 y Decreto 1377 de 2013 (Habeas Data)
+- **Arquitectura**: Monorepo con npm workspaces (`apps/api`, `apps/mobile`, `packages/shared`)
+- **Motor de Persistencia**: PostgreSQL 18.6 con Prisma ORM v6.19.3
+- **Autenticación**: Doble token JWT (Access Token 15 min + Refresh Token 7 días) con hashing Argon2id
+- **Control de Acceso**: RBAC desacoplado (Plataforma: `USER`/`ADMIN`; Organizacional: `OWNER`, `ADMIN`, `MEMBER`, `OPERATOR`)
+
+---
+
+## 2. Raíz del Repositorio y Configuración de Infraestructura
+
+### 2.1 `package.json` (Raíz)
+- **Ruta**: `/package.json`
+- **Propósito**: Manifiesto principal del monorepo que orquesta los workspaces del proyecto y centraliza los comandos de desarrollo, pruebas y compilación.
+- **Tecnologías**: npm workspaces (Node.js 20+).
+- **Scripts Principales**:
+  - `dev:api`: Inicia el backend en desarrollo con `tsx watch`.
+  - `dev:mobile`: Ejecuta el script interactivo de detección de IP Wi-Fi y levanta Metro Bundler para Expo.
+  - `test:api`: Ejecuta la suite API con Vitest (último resultado registrado: 166 pruebas en 12 archivos).
+  - `test:mobile`: Ejecuta la prueba E2E automatizada del flujo móvil contra el backend real.
+  - `build`: Compila concurrentemente `@data-circular/shared` y `@data-circular/api`.
+  - `db:migrate`: Ejecuta `prisma migrate deploy` en la base de datos PostgreSQL.
+  - `db:generate`: Genera el cliente tipado de Prisma Client.
+- **Flujo Paso a Paso**:
+  1. Al clonar el repositorio, `npm install` en la raíz resuelve y enlaza simbólicamente las dependencias de `apps/api`, `apps/mobile` y `packages/shared`.
+  2. Los scripts con `--workspace` delegan la ejecución al paquete correspondiente manteniendo el contexto del monorepo.
+- **Buenas Prácticas**:
+  - Centralización de comandos para evitar discrepancias de entorno.
+  - Uso de npm workspaces estándar sin dependencias de gestores propietarios externos.
+
+### 2.2 `.gitignore`
+- **Ruta**: `/.gitignore`
+- **Propósito**: Evitar la fuga de secretos, archivos `.env`, carpetas de dependencias (`node_modules`), artefactos de compilación (`dist/`, `.expo/`) y llaves criptográficas hacia el control de versiones.
+- **Estructura Paso a Paso**:
+  1. Bloque de dependencias: Ignora `node_modules/` en raíz y subproyectos.
+  2. Bloque de variables de entorno: Ignora `.env`, `.env.local`, `.env.*.local`.
+  3. Bloque de compilación: Ignora `dist/`, `build/`, `.expo/`.
+  4. Bloque de base de datos y Prisma: Ignora motores binarios descargados y clientes generados (`**/src/generated/prisma-client`).
+  5. Bloque de logs y depuración: Ignora `npm-debug.log*` y archivos `.log`.
+- **Buenas Prácticas**: Prevención estricta de fuga de credenciales bajo lineamientos OWASP.
+
+### 2.3 `.env.example`
+- **Ruta**: `/.env.example`
+- **Propósito**: Plantilla pública de variables de entorno requeridas por la aplicación, sin valores sensibles reales.
+- **Variables Documentadas**:
+  - `PORT`: Puerto TCP del servidor HTTP (por defecto `3000`).
+  - `NODE_ENV`: Entorno de ejecución (`development`, `test`, `production`).
+  - `DATABASE_URL`: Cadena de conexi?n PostgreSQL con usuario y contrase?a provistos localmente; no incluir credenciales reales en el repositorio.
+  - `JWT_SECRET`: Clave simétrica para firma de Access Tokens (mínimo 32 caracteres).
+  - `JWT_REFRESH_SECRET`: Clave simétrica para firma de Refresh Tokens (mínimo 32 caracteres).
+  - `CORS_ORIGIN`: Orígenes autorizados separados por coma.
+  - `DATA_POLICY_URL`: URL oficial para consulta de la Política de Tratamiento de Datos Personales.
+  - `DATA_POLICY_VERSION`: Versión vigente de la política (`v1.0-2026`).
+- **Buenas Prácticas**: Principio de configuración desacoplada (Twelve-Factor App).
+
+### 2.4 `docker-compose.yml`
+- **Ruta**: `/docker-compose.yml`
+- **Propósito**: Proporcionar un entorno contenedorizado opcional y reproducible de PostgreSQL 16 para desarrolladores que no cuenten con PostgreSQL nativo instalado.
+- **Configuración Clave**:
+  - Servicio `postgres`: Imagen `postgres:16-alpine`.
+  - Mapeo de puertos `5432:5432`.
+  - Volumen persistente `postgres_data` para conservar datos entre reinicios.
+  - Comprobación de salud (`healthcheck`) con `pg_isready -U postgres`.
+- **Buenas Prácticas**: Contenedorización inmutable y comprobación activa de disponibilidad de la base de datos.
+
+### 2.5 `README.md`
+- **Ruta**: `/README.md`
+- **Propósito**: Documento maestro de bienvenida, visión general del proyecto para la Fundación IMARA, guía de instalación rápida, prerrequisitos del sistema y comandos operativos.
+- **Estructura**:
+  1. Presentación institucional y justificación en economía circular.
+  2. Arquitectura del software y stack tecnológico.
+  3. Requisitos previos (Node.js, PostgreSQL).
+  4. Paso a paso de instalación y configuración de variables.
+  5. Comandos de ejecución y verificación de pruebas.
+
+### 2.6 `scripts/dev.js`
+- **Ruta**: `/scripts/dev.js`
+- **Propósito**: Script en Node.js para arrancar concurrentemente los servicios de desarrollo con formateo de logs unificado.
+- **Flujo**:
+  1. Detecta el sistema operativo y lanza `npm run dev:api`.
+  2. Maneja señales de interrupción (`SIGINT`, `SIGTERM`) para apagar procesos hijos limpiamente.
+- **Buenas Prácticas**: Graceful shutdown de procesos en terminal.
+
+### 2.7 `tsconfig.json` (Raíz)
+- **Ruta**: `/tsconfig.json`
+- **Propósito**: Configuración base de TypeScript para resolución de módulos y compatibilidad en el monorepo.
+
+---
+
+## 3. Paquete Compartido (`packages/shared/`)
+
+### 3.1 `packages/shared/package.json`
+- **Ruta**: `/packages/shared/package.json`
+- **Propósito**: Define la librería interna `@data-circular/shared`, empaquetada como módulo TypeScript con tipos compilados en `dist/index.d.ts`.
+- **Dependencias**: `zod` para validación de esquemas en tiempo de ejecución.
+
+### 3.2 `packages/shared/tsconfig.json`
+- **Ruta**: `/packages/shared/tsconfig.json`
+- **Propósito**: Configuración estricta del compilador TypeScript (`target: ES2022`, `module: CommonJS`, `declaration: true`, `strict: true`).
+
+### 3.3 `packages/shared/src/index.ts`
+- **Ruta**: `/packages/shared/src/index.ts`
+- **Propósito**: Fuente única de verdad (**Single Source of Truth**) de tipos, contratos de API, enumeraciones, esquemas Zod y constantes de localización territorial para Colombia a nivel nacional (ciudades y municipios).
+- **Componentes y Flujo Paso a Paso**:
+  1. **Constantes Territoriales**:
+     - `COUNTRY_CONFIG`: Define Colombia (`CO`, `+57`, `COP`, `America/Bogota`).
+     - `COLOMBIA_LOCATION`: Coordenadas centrales del territorio nacional.
+     - `COLOMBIA_MUNICIPALITIES` / `CITIES_AND_MUNICIPALITIES`: Arreglo inmutable con las ciudades, capitales departamentales y municipios de Colombia en orden alfabético estricto (A-Z), sin localidades distritales internas, con opción de selección o entrada manual ('Otro') para municipios lejanos u otros países.
+     - `formatCOP(amount)`: Formatea valores monetarios en moneda legal colombiana.
+     - `MATERIAL_CATEGORIES_COLOMBIA`: catálogo compacto heredado para presentación; el catálogo operativo vigente se consulta desde la API.
+  2. **Contratos Base de API**:
+     - `ApiResponse<T>`: Estructura estándar `{ success, message, data, error, timestamp }`.
+     - `HealthCheckData`: Datos de salud de servicio y PostgreSQL.
+  3. **Tipos de Usuario (Fases 2, 3, 4 y 6)**:
+     - `UserRole` (`USER`, `ADMIN`).
+     - `UserStatus` (`ACTIVE`, `INACTIVE`, `SUSPENDED`).
+     - `UserType` (`GENERATOR`, `RECYCLER`, `TRANSPORTER`, `TRANSFORMER`).
+     - `SafeUserDto`: DTO sanitizado que **NUNCA** incluye `passwordHash`.
+     - `PublicUserDto`: Perfil público minimizado (omite correo y teléfono para privacidad).
+     - `DataPolicyInfoDto`: Información de versión y URL de la política de datos personales.
+  4. **Esquemas Zod de Validación**:
+     - `PASSWORD_REGEX`: Exige mínimo 8 caracteres, al menos 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial.
+     - `registerSchema`: Valida nombre (3-150 caracteres), correo válido, teléfono colombiano opcional, tipo de usuario y aceptación expresa de política (`dataPolicyAccepted: true`).
+     - `loginSchema`: Valida formato de correo y contraseña obligatoria.
+     - `updateProfileSchema`: Valida edición de `fullName` y `phone`.
+     - `adminUpdateUserSchema`: Valida cambios administrativos de rol, tipo y estado.
+  5. **Entidades y DTOs de Organizaciones (Fase 7)**:
+     - `ORGANIZATION_TYPES`: `COMPANY`, `ASSOCIATION`, `FOUNDATION`, `COOPERATIVE`, `INSTITUTION`.
+     - `ORGANIZATION_STATUSES`: `ACTIVE`, `INACTIVE`, `SUSPENDED`.
+     - `VERIFICATION_STATUSES`: `UNVERIFIED`, `PENDING`, `VERIFIED`, `REJECTED`.
+     - `MEMBERSHIP_STATUSES`: `ACTIVE`, `INVITED`, `INACTIVE`.
+     - `ORG_ROLE_NAMES`: `OWNER`, `ADMIN`, `MEMBER`, `OPERATOR`.
+     - DTOs: `OrganizationDto`, `OrganizationMemberDto`, `RoleDto`, `PermissionDto`.
+     - Esquemas Zod: `createOrganizationSchema`, `updateOrganizationSchema`, `addMemberSchema`, `updateMemberRoleSchema`, `requestVerificationSchema`, `reviewVerificationSchema`.
+- **Buenas Prácticas**:
+  - Eliminación de discrepancias entre backend y mobile compartiendo los mismos tipos y validaciones.
+  - Inmutabilidad con `as const` en enumeraciones.
+
+---
+
+## 4. Backend API — Base de Datos y Persistencia (`apps/api/prisma/`)
+
+### 4.1 `apps/api/prisma/schema.prisma`
+- **Ruta**: `/apps/api/prisma/schema.prisma`
+- **Propósito**: Definición declarativa del modelo entidad-relación para PostgreSQL mediante Prisma Schema.
+- **Configuración del Generador**:
+  - `provider = "prisma-client-js"`
+  - `output = "../src/generated/prisma-client"` (permite control estricto sobre los binarios generados).
+- **Entidades Definidas**:
+  1. `User` (`users`):
+     - `id`: UUID `@id @default(uuid()) @db.Uuid`.
+     - `fullName`, `email` (único e indexado), `phone`, `userType`, `passwordHash`.
+     - `status` (`UserStatus`), `role` (`UserRole`).
+     - Marcas de tiempo: `createdAt`, `updatedAt`, `deletedAt` (borrado lógico).
+     - Relaciones: `dataPolicyAcceptance`, `memberships` (`OrganizationMember[]`), `invitedMembers`.
+     - Índices de rendimiento: `[status, deletedAt]`, `[email]`.
+  2. `DataPolicyAcceptance` (`data_policy_acceptances`):
+     - Garantiza trazabilidad de consentimiento legal según Ley 1581 de 2012.
+     - `userId` único (relación 1:1 con `User`), `acceptedAt`, `policyVersion`, `policyUrl`, `status`.
+  3. `Organization` (`organizations`):
+     - Entidad multitenant para empresas, asociaciones de recicladores y fundaciones.
+     - `id`, `name`, `legalName`, `taxId` (NIT único), `orgType`, `activityType`, `email`, `phone`, `address`, `locality`, `city`.
+     - `status`, `verificationStatus`, `verifiedAt`, `verificationNotes`, `certificateUrl`.
+     - Índices: `[status, deletedAt]`, `[orgType]`, `[locality]`.
+  4. `Role` (`roles`):
+     - Roles organizacionales desacoplados (`organizationId` nulo para roles de sistema, no nulo para personalizados).
+     - Nombre (`OWNER`, `ADMIN`, `MEMBER`, `OPERATOR`), `isSystem`.
+     - Restricción única: `@@unique([organizationId, name])`.
+  5. `Permission` (`permissions`):
+     - Códigos granulares (`org:read`, `org:update`, `members:invite`, etc.), nombre y módulo.
+  6. `RolePermission` (`role_permissions`):
+     - Tabla asociativa muchos a muchos entre `Role` y `Permission`. Clave compuesta `[roleId, permissionId]`.
+  7. `OrganizationMember` (`organization_members`):
+     - Vinculación de usuario con organización y rol. Restricción única `@@unique([organizationId, userId])`.
+
+### 4.2 Migraciones SQL Versionadas
+1. **`20260927180227_init_user_model/migration.sql`**:
+   - Crea enums `UserStatus`, `UserRole`, tabla `users` e índices primarios y compuestos.
+2. **`20261001120000_add_user_type/migration.sql`**:
+   - Agrega enum `UserType` y columna `user_type` con valor por defecto `GENERATOR`.
+3. **`20261002120000_add_data_policy_acceptance/migration.sql`**:
+   - Crea enum `DataPolicyAcceptanceStatus` y tabla `data_policy_acceptances` con clave foránea en cascada hacia `users`.
+4. **`20261004140000_add_organizations_and_memberships/migration.sql`**:
+   - Crea enums `OrganizationType`, `OrganizationStatus`, `VerificationStatus`, `MembershipStatus`.
+   - Crea tablas `organizations`, `roles`, `permissions`, `role_permissions` y `organization_members` con integridad referencial completa.
+
+---
+
+## 5. Backend API — Configuración, Utilidades y Middlewares (`apps/api/src/`)
+
+### 5.1 `apps/api/package.json` y `tsconfig.json`
+- **Ruta**: `/apps/api/package.json`, `tsconfig.json`
+- **Propósito**: Manifiesto del microservicio Express con TypeScript estricto, scripts de desarrollo con `tsx` y pruebas con Vitest.
+
+### 5.2 `apps/api/src/config/env.ts`
+- **Ruta**: `/apps/api/src/config/env.ts`
+- **Propósito**: Carga y validación en tiempo de arranque (**Fail-Fast**) de todas las variables de entorno utilizando Zod.
+- **Flujo**:
+  1. Ejecuta `dotenv.config()`.
+  2. Valida la estructura mediante `envSchema`. Si falta una variable crítica (ej. `DATABASE_URL` o `JWT_SECRET`), el proceso aborta inmediatamente arrojando un error explicativo antes de abrir sockets o puertos.
+- **Buenas Prácticas**: Prevención de fallos silenciosos en producción.
+
+### 5.3 `apps/api/src/database/prisma.ts`
+- **Ruta**: `/apps/api/src/database/prisma.ts`
+- **Propósito**: Instancia singleton de `PrismaClient` que gestiona el pool de conexiones hacia PostgreSQL y provee la función `checkDatabaseConnection()` que mide la latencia en milisegundos mediante una consulta trivial `SELECT 1`.
+
+### 5.4 `apps/api/src/utils/hash.ts`
+- **Ruta**: `/apps/api/src/utils/hash.ts`
+- **Propósito**: Hashing y verificación criptográfica de contraseñas utilizando el algoritmo **Argon2id** (ganador de la Password Hashing Competition y estándar recomendado por OWASP).
+- **Componentes**:
+  - `hashPassword(plainText)`: Genera un hash con salting criptográfico resistente a ataques por GPU/ASIC.
+  - `verifyPassword(hash, plainText)`: Verifica en tiempo constante para mitigar ataques de temporización (**Timing Attacks**).
+
+### 5.5 `apps/api/src/utils/jwt.ts`
+- **Ruta**: `/apps/api/src/utils/jwt.ts`
+- **Propósito**: Gestión del ciclo de vida de tokens criptográficos bajo arquitectura de doble token.
+- **Componentes**:
+  - `generateTokens(user)`: Genera simultáneamente un `accessToken` (expira en 15 minutos) y un `refreshToken` (expira en 7 días) firmados con secretos independientes.
+  - `verifyAccessToken(token)`: Valida firma y expiración del token de acceso.
+  - `verifyRefreshToken(token)`: Valida el token de refresco.
+
+### 5.6 `apps/api/src/utils/apiResponse.ts`
+- **Ruta**: `/apps/api/src/utils/apiResponse.ts`
+- **Propósito**: Estandarizar la estructura JSON de todas las respuestas HTTP emitidas por la API.
+- **Funciones**:
+  - `sendSuccess(res, data, message, statusCode)`: Emite `{ success: true, message, data, timestamp }`.
+  - `sendError(res, code, message, statusCode, details)`: Emite `{ success: false, error: { code, message, details }, timestamp }`.
+
+### 5.7 `apps/api/src/middleware/auth.middleware.ts`
+- **Ruta**: `/apps/api/src/middleware/auth.middleware.ts`
+- **Propósito**: Protección de rutas privadas y control de acceso basado en roles de plataforma.
+- **Flujo Paso a Paso**:
+  1. `authenticateToken`:
+     - Extrae la cabecera `Authorization: Bearer <token>`. Si falta o está mal formateada, responde `401 UNAUTHORIZED`.
+     - Verifica la firma con `verifyAccessToken()`.
+     - Consulta PostgreSQL para confirmar que el usuario existe y que `deletedAt` es nulo.
+     - Verifica que `status === 'ACTIVE'`. Si fue desactivado, responde `403 FORBIDDEN`.
+     - Inyecta el usuario sanitizado en `req.user` y continúa con `next()`.
+  2. `requireRole(allowedRoles)`:
+     - Comprueba si `req.user.role` coincide con alguno de los roles permitidos (ej. `'ADMIN'`). Si no, responde `403 FORBIDDEN`.
+
+### 5.8 `apps/api/src/middleware/errorHandler.ts`
+- **Ruta**: `/apps/api/src/middleware/errorHandler.ts`
+- **Propósito**: Manejador global de excepciones no capturadas.
+- **Flujo Paso a Paso**:
+  1. Detecta errores de validación de Zod (`err.name === 'ZodError'` o `issues`), extrayendo los campos fallidos y retornando `400 VALIDATION_ERROR` con detalle de cada campo.
+  2. Detecta errores operacionales con `statusCode` y `code` (ej. `AuthError`, `OrganizationError`), retornando el código HTTP correspondiente.
+  3. En errores 500 no controlados, registra la traza en servidor y responde de forma opaca sin filtrar información sensible al cliente en producción.
+
+### 5.9 `apps/api/src/middleware/notFoundHandler.ts`
+- **Ruta**: `/apps/api/src/middleware/notFoundHandler.ts`
+- **Propósito**: Captura cualquier petición dirigida a rutas o métodos no registrados en Express y responde con un código `404 NOT_FOUND` estructurado.
+
+### 5.10 `apps/api/src/middleware/rateLimiter.ts`
+- **Ruta**: `/apps/api/src/middleware/rateLimiter.ts`
+- **Propósito**: Protección perimetral contra ataques de fuerza bruta y denegación de servicio (DoS) usando `express-rate-limit`.
+- **Configuración**:
+  - `authLimiter`: Límite estricto de 10 intentos cada 15 minutos en `/auth/login`.
+  - `registerLimiter`: Límite de 20 peticiones por hora en `/auth/register`.
+
+### 5.11 `apps/api/src/middleware/validate.ts`
+- **Ruta**: `/apps/api/src/middleware/validate.ts`
+- **Propósito**: Middleware de orden superior que intercepta `req.body`, `req.query` o `req.params` y los valida contra un esquema Zod antes de alcanzar el controlador.
+
+### 5.12 `apps/api/scripts/copy-client.js`
+- **Ruta**: `/apps/api/scripts/copy-client.js`
+- **Propósito**: Script de compilación en Windows que copia de forma resiliente el cliente generado de Prisma hacia `dist/` resolviendo bloqueos de archivo cuando el servidor está activo.
+
+---
+
+## 6. Backend API — Módulos Funcionales (`apps/api/src/modules/`)
+
+### 6.1 Módulo Health (`modules/health/`)
+- **Archivos**: `health.controller.ts`, `health.routes.ts`
+- **Propósito**: Endpoint público `GET /api/v1/health` para sondas de liveness y readiness (Kubernetes, Docker, Uptime monitors).
+- **Flujo**:
+  1. Solicita a `prisma.ts` el estado de conexión de PostgreSQL.
+  2. Calcula el tiempo de actividad del proceso (`uptimeSeconds`).
+  3. Retorna estado `healthy` o `degraded` con código HTTP 200 o 503.
+
+### 6.2 Módulo de Autenticación (`modules/auth/`)
+- **Archivos**: `auth.service.ts`, `auth.controller.ts`, `auth.routes.ts`
+- **Propósito**: Registro de usuarios con consentimiento de Habeas Data, inicio de sesión, renovación de tokens y cierre de sesión.
+- **Flujo Paso a Paso**:
+  1. `register(input)`:
+     - Normaliza el correo electrónico (`trim().toLowerCase()`).
+     - Comprueba si el correo ya existe en PostgreSQL; si existe, responde `409 EMAIL_ALREADY_REGISTERED`.
+     - Hashea la contraseña con Argon2id.
+     - Asigna forzosamente `role = USER` (prevención de escalada de privilegios).
+     - Si `dataPolicyAccepted: true`, registra en la misma transacción la aceptación en `data_policy_acceptances`.
+     - Retorna `SafeUserDto` y el par de tokens JWT.
+  2. `login(input)`:
+     - Busca al usuario por correo normalizado omitiendo registros con borrado lógico.
+     - Si el usuario no existe o la contraseña no coincide con el hash, responde con mensaje genérico `401 INVALID_CREDENTIALS` (anti-enumeración de usuarios).
+     - Genera y retorna tokens JWT.
+  3. `dataPolicyController`:
+     - Retorna `GET /auth/data-policy` con disponibilidad, versión y URL oficial configurada.
+
+### 6.3 Módulo de Usuarios y Perfil (`modules/users/`)
+- **Archivos**: `users.repository.ts`, `users.service.ts`, `users.controller.ts`, `users.routes.ts`
+- **Propósito**: CRUD seguro de usuarios, visualización de perfil propio, perfiles públicos y administración.
+- **Flujo Paso a Paso**:
+  1. `getMe(userId)`: Retorna el perfil completo del usuario autenticado sin `passwordHash`.
+  2. `updateMe(userId, input)`: Permite actualizar únicamente `fullName` y `phone`. Cualquier intento de enviar `role`, `status` o `email` es ignorado o rechazado.
+  3. `deleteMe(userId)`: Aplica borrado lógico (`softDelete`): `status = 'INACTIVE'`, `deletedAt = NOW()`.
+  4. `getPublicProfile(id)`: Proyecta `toPublicUser` ocultando correo, teléfono y metadatos internos para interacción segura en el marketplace.
+  5. CRUD Administrativo (`requireRole('ADMIN')`): Permite listar todos los usuarios, crear cuentas con roles específicos, modificar estados y borrado permanente para mantenimiento.
+
+### 6.4 Módulo de Organizaciones, Membresías, Roles y Permisos (`modules/organizations/`) — Fase 7
+- **Archivos**:
+  - `organizations.seed.ts`:
+    - Inicializador idempotente que siembra la matriz de permisos (`org:read`, `org:update`, `org:delete`, `members:read`, `members:invite`, `members:update`, `members:remove`, `verification:request`, `verification:review`) y los roles de sistema (`OWNER`, `ADMIN`, `MEMBER`, `OPERATOR`).
+  - `organizations.repository.ts`:
+    - Capa de acceso a datos Prisma:
+      - `create`: En una transacción atómica crea la organización y vincula al creador como `OWNER`.
+      - `findByTaxId`: Verifica unicidad de NIT en Colombia.
+      - `findMember` / `findMemberById`: Resuelve membresías con roles y permisos asociados.
+      - `countOwners`: Cuenta propietarios activos para proteger la organización.
+      - `updateVerification`: Actualiza estados de certificación institucional.
+  - `organizations.service.ts`:
+    - Lógica de negocio y reglas de dominio:
+      - Valida que no existan colisiones de NIT (409 Conflict).
+      - Controla que solo miembros autorizados accedan a la entidad.
+      - **Regla de integridad**: Impide degradar o remover al único `OWNER` de una organización activa (400 Bad Request).
+      - Gestiona invitaciones por correo de usuarios registrados.
+  - `organizations.middleware.ts`:
+    - `requireOrgMember`: Valida que el usuario pertenezca a la organización solicitada (`:id` o `:orgId`) con estado `ACTIVE`. Permite bypass automático a administradores globales de la plataforma (`ADMIN`).
+    - `requireOrgPermission(code)`: Valida que el rol interno del usuario cuente con el permiso específico.
+  - `organizations.controller.ts` y `organizations.routes.ts`:
+    - Endpoints REST para CRUD de empresas, membresías, actualización de roles y solicitud/dictamen de certificación ambiental.
+
+### 6.5 Módulo de Catálogo de Materiales y Unidades (`modules/catalog/`) — Fase 8
+- **Archivos**:
+  - `catalog.seed.ts`:
+    - Sembrador idempotente de 6 unidades de medida y 11 categorías maestras con 77 subcategorías (75 activas y 2 inactivas por revisión jurídica). Las subcategorías heredadas que ya no pertenecen al catálogo se conservan inactivas para proteger referencias históricas.
+  - `catalog.repository.ts`:
+    - Capa de acceso a datos Prisma para listar el árbol jerárquico de categorías, consultar por ID o nombre, y CRUD de unidades de medida.
+  - `catalog.service.ts`:
+    - Validaciones de negocio: unicidad de nombres por nivel, verificación estricta de existencia de `parentId` al crear subcategorías (rechazo si no existe) e impedimento de auto-referencia circular.
+  - `catalog.controller.ts` y `catalog.routes.ts`:
+    - Endpoints REST para `/api/v1/catalog/categories` y `/api/v1/catalog/units`. Lectura abierta a usuarios autenticados, mutaciones restringidas a rol `ADMIN`.
+
+### 6.6 Módulo de Publicaciones de Oferta y Necesidad (`modules/publications/`) — Fase 8
+- **Archivos**:
+  - `publications.repository.ts`:
+    - Persistencia en PostgreSQL para ofertas (`OFFER`), cantidades, unidades, ubicación y vigencia; `NEED` se conserva solo por compatibilidad histórica.
+    - Implementación de **Lazy Expiration Check**: evalúa en tiempo de consulta si `expiresAt < now()` y sincroniza el estado `EXPIRED` en PostgreSQL.
+  - `publications.service.ts`:
+    - Reglas de dominio:
+      - Validación obligatoria de que `categoryId` sea una subcategoría hoja (`parentId` no nulo).
+      - Autorización multitenant: edición/cierre restringido al creador (`ownerUserId`), miembros autorizados de la entidad (`OWNER`, `ADMIN` o permiso `org:update`) o administradores de plataforma.
+      - Validación de membresía activa al publicar a nombre de una organización.
+      - Búsqueda general paginada con filtros combinables (`search`).
+      - Inclusión del contador liviano `publicacionesCompatibles` en el detalle.
+  - `publications.controller.ts` y `publications.routes.ts`:
+    - Endpoints REST montados en `/api/v1/publications`: creación, detalle, edición, cierre lógico, listado propio (`/mine`), listado general paginado, búsqueda avanzada (`/search`) y consulta de coincidencias (`/:id/matches`).
+
+### 6.7 Módulo de Coincidencias y Sugerencias (`modules/matches/`)
+- **Archivos**:
+  - `matches.service.ts`:
+    - Algoritmo de compatibilidad determinista y explicable (HU-08).
+    - Factores de puntuación: subcategoría (+50), categoría principal (+20), ubicación (+20), cantidad (+15), urgencia (+10), recencia (+5).
+    - Umbral de corte $\ge 40$ puntos.
+    - Estrategia de rendimiento con pre-filtrado en PostgreSQL (índices de categoría y ciudad).
+    - Conteo liviano de coincidencias para el detalle de publicación.
+    - Generador de bandeja de sugerencias para el usuario autenticado (top 5 coincidencias).
+  - `matches.controller.ts`: Controladores HTTP para `/publications/:id/matches` y `/matches/my-suggestions`.
+  - `matches.routes.ts`: Enrutador montado en `/api/v1/matches`.
+
+### 6.8 Módulo de Conversaciones, Mensajes y Propuestas (`modules/conversations/`) — Fase 10 (RF-12, RF-13, CU-07)
+- **Archivos**:
+  - `conversations.repository.ts`:
+    - Capa de acceso a datos Prisma para conversaciones, mensajes y propuestas.
+    - Idempotencia en creación mediante clave única `(publication_id, initiator_user_id)`.
+    - Sanitización estricta de privacidad: proyecta `toConversationDto`, `toMessageDto` y `toProposalDto` excluyendo correos, teléfonos y datos de contacto privados.
+    - Transacciones atómicas con control de concurrencia para creación y respuesta de propuestas.
+    - Conteo eficiente de mensajes no leídos y actualización de estados independientes (`ConversationParticipantState`).
+  - `conversations.service.ts`:
+    - Reglas de dominio y validaciones:
+      - Impide contactar publicaciones propias o de la propia organización (400 Bad Request).
+      - Rechaza inicio de conversaciones sobre publicaciones cerradas o expiradas (409 Conflict).
+      - Autorización multitenant por membresía y roles (`OWNER`, `ADMIN`, `OPERATOR`; rechaza escritura a `MEMBER` con 403).
+      - Rate limiting anti-spam de 30 mensajes por minuto por usuario en cada conversación (429 Too Many Requests).
+      - Garantiza que a lo sumo exista una propuesta `PENDING` por conversación; al presentar una contrapropuesta, la anterior pasa a `SUPERSEDED` y se emite un mensaje `SYSTEM`.
+      - Impide que el proponente auto-acepte o auto-rechace su propia propuesta (403 Forbidden).
+      - Cierra la negociación para nuevas propuestas una vez se acepta una (`ACCEPTED`).
+  - `conversations.controller.ts`:
+    - Controladores HTTP para `/conversations` (iniciar, detalle, bandeja, archivo, conteo no leídos, mensajes y propuestas) y `/proposals/:id/accept`, `/proposals/:id/reject`.
+  - `conversations.routes.ts`:
+    - Enrutadores Express `conversationsRouter` y `proposalsRouter` protegidos con `authenticateToken`.
+
+### 6.9 Módulo de Operaciones y Logística (`modules/operations/`) — Fase 11 (RF-14, RF-15, HU-09)
+- **Archivos**:
+  - `operations.repository.ts`:
+    - Persistencia en PostgreSQL para el ciclo de vida completo de la operación.
+    - Generación atómica de códigos únicos `OP-BOG-YYYY-SEQ-XXXX`.
+    - Registro de programación (`schedule`), recolección (`collect`), recepción con báscula (`receive`), cierre (`close`), cancelación (`cancel`), evidencias (`addEvidence`) y evaluaciones (`addReview`).
+    - DTOs sanitizados `toOperationDto`, `toEvidenceDto` y `toReviewDto`.
+  - `operations.service.ts`:
+    - Máquina de estados finitos estricta:
+      `PENDING_SCHEDULE → SCHEDULED → IN_TRANSIT → COLLECTED → RECEIVED → COMPLETED` (o `CANCELLED`).
+    - Control de transiciones: rechaza transiciones inválidas con `400 BAD_REQUEST: INVALID_TRANSITION`.
+    - Control de acceso: solo participantes directos o administradores pueden interactuar con la operación.
+    - Regla de evaluación: solo se permite evaluar operaciones en estado `COMPLETED` y una única vez por participante.
+  - `operations.controller.ts` y `operations.routes.ts`:
+    - Endpoints REST montados en `/api/v1/operations`: listado (`GET /`), detalle (`GET /:id`), creación (`POST /`), programación (`PATCH /:id/schedule`), recolección (`PATCH /:id/collect`), evidencias (`POST /:id/evidences`), recepción (`PATCH /:id/receive`), cierre (`PATCH /:id/close`), cancelación (`PATCH /:id/cancel`) y evaluaciones (`POST /:id/reviews`).
+
+### 6.10 Módulo de Evaluaciones, Administración y Reportes (`modules/admin/`) — Fase 12
+- **Archivos**:
+  - `admin.repository.ts`:
+    - Consultas agregadas sobre **datos reales de PostgreSQL** (sin indicadores ficticios ni mocks).
+    - Agregación de pesaje real (`actualWeight` o `quantity`) de operaciones completadas para toneladas recuperadas totales y del mes.
+    - Conteo de organizaciones verificadas, publicaciones activas y operaciones cerradas.
+    - Cálculo de calificación de satisfacción promedio distrital a partir de `operation_reviews`.
+    - Distribución territorial por ciudades y municipios de Colombia.
+    - Desglose de materiales recuperados por categoría.
+    - Supervisión administrativa paginada de todas las operaciones logísticas.
+  - `admin.service.ts`:
+    - Lógica de negocio y empaquetado de DTOs (`CircularKpisDto`, `LocalityMetricsDto`, `MaterialSummaryDto`).
+  - `admin.controller.ts` y `admin.routes.ts`:
+    - Endpoints REST montados en `/api/v1/admin`: KPIs (`GET /reports/kpis`), localidades (`GET /reports/localities`), materiales (`GET /reports/materials`) y supervisión de operaciones (`GET /operations`).
+    - Protegidos con `authenticateToken` y `requireRole('ADMIN')`.
+
+### 6.11 Módulo Dashboard (`modules/dashboard/`)
+- **Archivos**: `dashboard.routes.ts`
+- **Propósito**: Consola web servida en la raíz `GET /` con interfaz HTML interactiva para pruebas manuales rápidas de salud, registro y login desde el navegador.
+
+### 6.12 Enrutamiento Principal y Servidor
+- **`apps/api/src/routes/v1.routes.ts`**: Enrutador central que monta `/health`, `/auth`, `/users`, `/organizations`, `/catalog`, `/publications`, `/matches`, `/conversations`, `/proposals`, `/operations` y `/admin` bajo el prefijo común `/api/v1`.
+- **`apps/api/src/app.ts`**: Fábrica de la aplicación Express (`createApp`) configurando Helmet, CORS dinámico, parsers JSON y middlewares de error.
+- **`apps/api/src/server.ts`**: Punto de entrada del proceso. Conecta a PostgreSQL, arranca el servidor HTTP en el puerto configurado y registra manejadores para Graceful Shutdown (`SIGTERM`, `SIGINT`).
+
+---
+
+## 7. Backend API — Suites de Pruebas Automatizadas (`apps/api/tests/`)
+
+- **Tecnología**: Vitest + Supertest (último resultado registrado: 166 pruebas automatizadas en 12 archivos, todas aprobadas).
+1. `tests/health.test.ts` (2 tests):
+   - Verifica respuesta 200 en `/api/v1/health` con conectividad a PostgreSQL.
+   - Verifica respuesta 404 en rutas inexistentes.
+2. `tests/user-persistence.test.ts` (5 tests):
+   - Valida claves primarias UUIDv4 en PostgreSQL.
+   - Valida restricción de unicidad en correos.
+   - Valida normalización de correos electrónicos.
+   - Valida persistencia de tipos de participante (`UserType`).
+   - Valida borrado lógico (`deletedAt`).
+3. `tests/auth.test.ts` (17 tests):
+   - Registro exitoso con par de tokens JWT y sin fuga de `passwordHash`.
+   - Rechazo de contraseñas débiles conforme a `PASSWORD_REGEX`.
+   - Rechazo de registro si no se acepta la política de datos.
+   - Login con credenciales válidas y rechazo genérico con credenciales inválidas.
+   - Renovación de token mediante `/auth/refresh`.
+   - Cierre de sesión e invalidación.
+   - Consulta de metadatos de política de datos (`GET /auth/data-policy`).
+4. `tests/users-crud.test.ts` (13 tests):
+   - Consulta de perfil propio (`GET /users/me`).
+   - Edición de perfil propio (`PATCH /users/me`).
+   - Desactivación lógica de la propia cuenta (`DELETE /users/me`).
+   - Consulta de perfil público de otro usuario sin datos sensibles.
+   - Operaciones exclusivas de administrador (`requireRole('ADMIN')`).
+5. `tests/organizations.test.ts` (24 tests):
+   - Catálogo de roles y permisos del sistema.
+   - Creación de empresa y asignación automática del creador como `OWNER`.
+   - Detección y rechazo de NIT duplicado (409 Conflict).
+   - Listado de organizaciones del usuario y aislamiento frente a usuarios ajenos.
+   - Vinculación de nuevos miembros por correo y prevención de membresías duplicadas.
+   - Validación de permisos granulares (`org:update`, `members:invite`, etc.).
+   - Rechazo de degradación o eliminación del único `OWNER`.
+   - Flujo de solicitud de verificación institucional y dictamen administrativo por parte de `ADMIN`.
+   - Desactivación lógica de la organización (`Soft Delete`).
+6. `tests/catalog-and-publications.test.ts` (20 tests):
+   - Verificación de las 11 categorías, 75 subcategorías activas y 2 subcategorías inactivas por revisión jurídica.
+   - Verificación de unidades mínimas (kg, ton, und, l, m3, bulto).
+   - Jerarquía de categorías (rechazo de subcategoría si `parentId` no existe).
+   - Rechazo de publicación sobre categoría principal (400 Bad Request).
+   - Creación de ofertas personales o vinculadas a organizaciones; `NEED` se conserva en el enum por compatibilidad y no se admite para nuevas publicaciones.
+   - Edición por dueño y por miembro de organización con rol `ADMIN`.
+   - Rechazo de edición por tercero no autorizado (403 Forbidden).
+   - Expiración dinámica reflejada como `EXPIRED`.
+   - Listado propio (`/mine`) y listado general paginado.
+   - Cierre y eliminación lógica de publicación (`status: CLOSED`).
+7. `tests/search-and-matches.test.ts` (12 tests):
+   - Búsqueda sin filtros con paginación obligatoria y solo publicaciones `ACTIVE`.
+   - Filtro jerárquico por categoría padre que incluye automáticamente sus subcategorías.
+   - Filtro por subcategoría exacta de material.
+   - Filtros combinados de tipo (`OFFER`), ciudad, municipio (`locationArea`) y rango de cantidad.
+   - Ordenamiento prioritario por publicaciones urgentes (`sortBy=urgent_first`).
+   - Reglas de visibilidad para publicaciones `EXPIRED` (ocultas a terceros, visibles para el dueño).
+   - Identificación de ofertas compatibles con las preferencias de material de organizaciones.
+   - Exclusión de candidatos débiles por debajo del umbral de compatibilidad (< 40 puntos).
+   - Exclusión de publicaciones incompatibles con las categorías seleccionadas.
+   - Desglose transparente y auditable de factores en lenguaje claro (HU-08).
+   - Detalle de publicación con contador liviano `publicacionesCompatibles`.
+   - Bandeja de sugerencias agregada para el usuario autenticado (`GET /matches/my-suggestions`).
+8. `tests/conversations-and-proposals.test.ts` (22 tests) — Fase 10:
+   - Iniciar conversación con mensaje inicial sobre publicación ajena (201 Created).
+   - Idempotencia en apertura de chat (reutiliza conversación existente con 200 OK).
+   - Rechazo de contacto a publicación propia o de la propia organización (400 Bad Request).
+   - Rechazo de inicio de conversación sobre publicaciones cerradas o expiradas (409 Conflict).
+   - Consulta de bandeja de conversaciones con resumen de publicación y conteo de no leídos.
+   - Verificación estricta de privacidad: ausencia absoluta de emails y teléfonos de la contraparte en respuestas.
+   - Control de acceso: bloqueo con 403 Forbidden a terceros no participantes.
+   - Archivo y desarchivo de conversación por participante independiente.
+   - Envío y listado cronológico de mensajes de texto (201 Created).
+   - Control RBAC: Miembro con rol `MEMBER` recibe 403 al intentar enviar mensajes.
+   - Rate limiting anti-spam (>30 msgs/min) con 429 Too Many Requests.
+   - Creación de propuesta formal inicial con estado `PENDING` y mensaje `SYSTEM`.
+   - Prohibición de auto-aceptación o auto-rechazo por el proponente (403 Forbidden).
+   - Bloqueo de respuesta a terceros (403 Forbidden).
+   - Flujo de contrapropuesta atómica: anterior pasa a `SUPERSEDED`, nueva queda `PENDING`.
+   - Rechazo formal de contrapropuesta por la contraparte (200 OK, `REJECTED`).
+   - Aceptación formal de propuesta por la contraparte (200 OK, `ACCEPTED`).
+   - Control de concurrencia ante doble respuesta (409 Conflict).
+   - Cierre de negociación: bloqueo de nuevas propuestas tras aceptación (409 Conflict).
+9. `tests/operations-flow.test.ts` (17 tests) — Fase 11:
+   - Creación automática de operación en estado `PENDING_SCHEDULE` al aceptar una propuesta.
+   - Creación manual de operación vía `POST /api/v1/operations`.
+   - Consulta paginada y filtrado por estado de operaciones.
+   - Consulta detallada con relaciones y validación de autorización (bloqueo a terceros no participantes con 403).
+   - Programación de fecha, franja y datos de transporte (`PATCH /schedule`).
+   - Rechazo de transiciones inválidas fuera de orden (ej. intentar cerrar o recibir sin programar/recolectar con 400).
+   - Registro de recolección en sitio (`PATCH /collect`).
+   - Adjuntar evidencias fotográficas y documentales (`POST /evidences`).
+   - Validación de esquema de evidencia (rechazo de URL inválida con 400).
+   - Recepción en planta con pesaje de báscula (`PATCH /receive`).
+   - Cierre formal de la operación (`PATCH /close`) culminando en estado `COMPLETED`.
+   - Bloqueo de mutaciones posteriores sobre operaciones cerradas.
+   - Flujo de cancelación formal justificada (`PATCH /cancel`).
+   - Bloqueo de cancelación sobre operaciones finalizadas (`COMPLETED`).
+10. `tests/evaluations-and-reports.test.ts` (11 tests) — Fase 12:
+    - Evaluación y calificación de operación completada (`POST /operations/:id/reviews`).
+    - Rechazo de evaluación si la operación no está en estado `COMPLETED` (400).
+    - Bloqueo de evaluación por usuarios no participantes (403).
+    - Prevención de duplicación de evaluación por el mismo usuario (409 Conflict).
+    - Protección de rutas administrativas `/api/v1/admin/*`: rechazo con 403 Forbidden a usuarios normales (`USER`).
+    - Acceso exclusivo para administradores (`ADMIN`).
+    - Indicadores circulares desde la base de datos configurada (`GET /admin/reports/kpis`).
+    - Métricas territoriales por ciudades y municipios de Colombia (`GET /admin/reports/localities`).
+    - Balance de materiales recuperados por categoría (`GET /admin/reports/materials`).
+    - Supervisión administrativa con filtrado territorial (`GET /admin/operations`).
+11. `tests/legal-and-parameters.test.ts` (15 tests) — Sistema Legal, Tarifas Editables y Verificación Documental:
+    - Verificación de metadatos del catálogo oficial `LEGAL_CONTENT_ES` (`version: '2026.1.0'`, `estado: BORRADOR - PENDIENTE DE REVISIÓN JURÍDICA`).
+    - Consistencia y presencia de los 6 textos normativos oficiales sin texto quemado en pantallas.
+    - Generador del texto del badge de usuario verificado con fecha dinámica.
+    - Generador del texto de revocación con fecha dinámica.
+    - Helper de auditoría de vistas legales con captura de versión mostrada.
+    - Contraste WCAG AA para tokens oficiales (`brand.orange = #FA6060`, texto verde oscuro `#102A1C`, `brand.orangeStrong = #C2570C`).
+    - Parámetros de tarifas de verificación (`VerificationFee`) por tipo (`SELF` / `OTHER`) con valor `null` por defecto.
+    - Validación del aviso de tarifa pendiente cuando el valor es `null`.
+    - Registro inmutable de auditoría (`AuditLog`) ante cambios de tarifa con motivo obligatorio.
+    - Restricción de permisos para modificación de tarifas (`platform:settings`).
+    - Instantánea de tarifa (`feeSnapshot`) al radicar solicitudes para garantizar inmutabilidad retroactiva.
+    - Ajuste manual administrativo de tarifas por solicitud específica con registro de auditoría.
+    - Emisión y consulta pública de constancias de verificación por código criptográfico.
+    - Renderizado condicional de leyendas de borrador e indicación de revocación de constancias.
+12. `tests/admin-analytics.test.ts` (8 tests):
+    - Agregaciones administrativas por localidad y categoría de material.
+    - Filtrado y ordenamiento de operaciones supervisadas.
+    - Comportamiento de analítica ante conjuntos de datos vacíos.
+
+---
+
+## 8. Frontend Móvil (`apps/mobile/`)
+
+### 8.1 Configuración y Empaquetado
+- **`apps/mobile/package.json`**: Manifiesto con dependencias actuales: Expo SDK 57, React Native 0.86.3, Expo Router 57, Expo SecureStore y Expo Vector Icons.
+- **`apps/mobile/app.json`**: Metadatos de la aplicación móvil (nombre `DATA_CIRCULAR`, slug `data-circular`, color institucional verde bosque `#1B4332`, orientación vertical).
+- **`apps/mobile/metro.config.js`**: Configuración de Metro adaptada al monorepo para resolver dependencias hoisted en la raíz y enlazar `@data-circular/shared`.
+- **`apps/mobile/scripts/start-mobile.js`**: Script de arranque que detecta la IP Wi-Fi local de la máquina de desarrollo (ej. `192.168.10.11`) para que los dispositivos físicos con Expo Go se conecten fluidamente al backend.
+- **`apps/mobile/scripts/verify-mobile-flow.ts`**: Script de verificación E2E que ejecuta de principio a fin los 6 flujos móviles (Bienvenida, Registro, Login, Perfil, Edición, Logout y Soft Delete) contra el backend en PostgreSQL.
+
+### 8.2 Núcleo y Servicios (`apps/mobile/src/`)
+- **`src/theme/colors.ts`**: Paleta corporativa de economía circular:
+  - `primary`: `#2D6A4F` (Verde Esmeralda)
+  - `primaryDark`: `#1B4332` (Verde Bosque)
+  - `primaryLight`: `#52B788` (Verde Salvia)
+  - `accent`: `#74C69D`, `accentLight`: `#D8F3DC`
+  - `background`: `#F7F9F8` (Neutro Limpio)
+  - `card`: `#FFFFFF`
+  - `text`: `#1A201C`, `textMuted`: `#6C757D`
+  - `danger`: `#D90429`, `warning`: `#F77F00`
+- **`src/config/env.ts`**: Detección dinámica del endpoint de la API:
+  - Web / iOS Simulator: `http://localhost:3000/api/v1`
+  - Android Emulator: `http://10.0.2.2:3000/api/v1`
+  - Dispositivo Físico: `EXPO_PUBLIC_API_URL`
+- **`src/services/storage.ts`**: Abstracción de almacenamiento seguro:
+  - Móvil: `expo-secure-store` (Keychain en iOS, Keystore con hardware backing en Android).
+  - Web: `localStorage` con aislamiento.
+  - Guarda únicamente tokens JWT y perfil seguro; **nunca contraseñas**.
+- **`src/api/client.ts`**: Cliente HTTP base (`apiFetch`):
+  - Inyecta automáticamente el token Bearer en el encabezado `Authorization`.
+  - Normaliza errores de red y respuestas del servidor en mensajes comprensibles.
+- **`src/api/auth.api.ts`**: Métodos para `register()`, `login()`, `logout()` y `getDataPolicyInfo()`.
+- **`src/api/users.api.ts`**: Métodos para `getMe()`, `updateMe()`, `deleteMe()`, `listAll()`, `adminCreate()`, `adminUpdate()` y `adminDelete()`.
+- **`src/api/organizations.api.ts`**: Métodos para organizaciones, membresías y verificación distrital.
+- **`src/api/catalog.api.ts`**: Consulta jerárquica de categorías y unidades de medida.
+- **`src/api/publications.api.ts`**: Métodos para crear, editar, buscar, cerrar y listar publicaciones.
+- **`src/api/matches.api.ts`**: Consulta de coincidencias por publicación y sugerencias personalizadas.
+- **`src/api/conversations.api.ts`** (Fase 10): Métodos para iniciar conversación, consultar bandeja, detalle, conteo de no leídos, archivo, envío de mensajes y ciclo de propuestas (crear, aceptar, rechazar).
+- **`src/context/AuthContext.tsx`**: Proveedor global de autenticación con React Context:
+  - Restaura la sesión en frío validando el token contra `GET /users/me`.
+  - Expone `login()`, `register()`, `logout()`, `updateProfile()`, `deleteAccount()`.
+  - Provee estados `user`, `isLoading`, `isAuthenticated`.
+
+### 8.3 Componentes Reutilizables de Interfaz (`apps/mobile/src/components/`)
+- **`Button.tsx`**: Botón táctil accesible con variantes (`primary`, `secondary`, `outline`, `danger`, `ghost`) e indicador de actividad (`ActivityIndicator`).
+- **`Input.tsx`**: Campo de formulario con etiqueta flotante, mensajes de error, botón de alternar visibilidad de contraseña (Ver/Ocultar) y soporte para prefijo telefónico.
+- **`Card.tsx`**: Contenedor de superficie con bordes redondeados y sombra para organización visual.
+- **`ErrorBanner.tsx`**: Banner de alertas para mensajes de error, éxito, advertencia o información.
+- **`LocalityPicker.tsx`**: Selector modal de ciudad o municipio con búsqueda integrada y datos de ciudades/municipios importados directamente de `@data-circular/shared`.
+
+### 8.4 Sistema de Diseño y Tokens Centralizados (`apps/mobile/src/theme/`)
+- **`src/theme/tokens.ts`**: Tokens centralizados extraídos directamente de la maqueta (`maqueta.jpg`):
+  - Colores institucionales: cabecera oscura (`#1F4D36`), campos de login (`#244D38`), botón de acción verde (`#1F7A45`), fondo de chips (`#E4EEE4`), texto oscuro (`#102A1C`), badges urgentes (`#D90429`).
+  - Radios: squircles (18), tarjetas (16), píldoras (9999).
+  - Sombras y elevaciones para tarjetas, botones, cabeceras y botón flotante central (+).
+  - Área táctil mínima accesible de 44 pt.
+- **`src/theme/colors.ts`**: Mapeo retrocompatible sobre los tokens de diseño.
+
+### 8.5 Clientes de API Móvil (`apps/mobile/src/api/`)
+- **`src/api/client.ts`**: Wrapper HTTP tipado sobre `fetch` nativo con inyección automática de Bearer Token y manejo de errores `ApiError`.
+- **`src/api/auth.api.ts`**: Métodos de autenticación (`login`, `register`, `logout`, `refreshToken`, `getDataPolicy`).
+- **`src/api/users.api.ts`**: Métodos para perfil (`getMe`, `updateMe`, `deleteMe`) y administración de usuarios.
+- **`src/api/catalog.api.ts`**: Consulta del árbol de categorías (`getCategories`) y unidades de medida (`getUnits`).
+- **`src/api/publications.api.ts`**: Operaciones de publicaciones (`search`, `getById`, `create`, `update`, `close`, `getMine`).
+- **`src/api/matches.api.ts`**: Consulta de coincidencias por publicación (`getMatches`) y bandeja de sugerencias (`getMySuggestions`).
+- **`src/api/organizations.api.ts`**: Gestión de organizaciones, membresías, dictamen y radicación de certificación (`getMyOrganizations`, `getAllOrganizations`, `create`, `update`, `requestVerification`, `reviewVerification`, `getMembers`, `addMember`).
+- **`src/api/operations.api.ts`**: Gestión del ciclo de vida operativo (`getOperations`, `getOperationById`, `schedule`, `collect`, `addEvidence`, `receive`, `close`, `cancel`, `createReview`) (Fase 11).
+- **`src/api/admin.api.ts`**: Métodos administrativos e indicadores distritales (`getCircularKpis`, `getLocalityMetrics`, `getMaterialSummaries`, `getSupervisionOperations`) (Fase 12).
+
+### 8.6 Capa de Mocks y Control de Características (`apps/mobile/src/mocks/` y `config/`)
+- **`src/config/features.ts`**: Banderas de activación desacopladas (`USE_MOCKS_CHAT`, `USE_MOCKS_PROPOSALS`, `USE_MOCKS_OPERATIONS: false`, `USE_MOCKS_ADMIN_MODERATION: false`). Las operaciones y administración distrital operan directamente contra la API REST real de backend.
+- **`src/mocks/chat.mock.ts`**: Conversaciones simuladas y mensajes hilos para negociación circular (Fase 10).
+- **`src/mocks/proposals.mock.ts`**: Datos de referencia heredados; las propuestas activas se consultan en el backend.
+- **`src/mocks/operations.mock.ts`**: Estructuras mock de referencia histórica.
+- **`src/mocks/moderation.mock.ts`**: Reportes de moderación de referencia histórica.
+
+### 8.7 Componentes Reutilizables de Interfaz (`apps/mobile/src/components/`)
+- **`src/components/BrandHeader.tsx`**: Cabecera institucional curva en verde bosque oscuro (`#1F4D36`) con título DATA_CIRCULAR, subtítulo de Fundación IMARA, soporte para botón atrás y slot de acciones derechas.
+- **`src/components/CircularSeal.tsx`**: Sellos circulares emblemáticos de sostenibilidad e impacto positivo observables en la base del login (Sostenibilidad, Reciclaje Circular, Impacto Positivo).
+- **`src/components/CategoryChip.tsx`**: Chip en squircle verde salvia (`#E4EEE4`) con íconos temáticos según tipo de material y etiqueta inferior legible.
+- **`src/components/MaterialCard.tsx`**: Tarjeta en cuadrícula de 2 columnas con imagen o fallback temático, badges de tipo y urgencia, cantidad/unidad técnica, pin de ciudad o municipio y botón verde *"Ver detalle"*.
+- **`src/components/MatchCard.tsx`**: Tarjeta de coincidencia inteligente (Fase 9 / HU-08) con badge de compatibilidad porcentual y desglose auditable de factores.
+- **`src/components/FilterModal.tsx`**: Modal deslizante de filtros avanzados (tipo, categoría, ciudad o municipio, cantidad mínima/máxima, unidad, urgencia y ordenamiento).
+- **`src/components/BottomTabBar.tsx`**: Barra de navegación inferior con 5 elementos: Inicio, Publicar, botón flotante central (+) elevado con sombra, Chat con contador de mensajes no leídos, y Perfil.
+- **`src/components/MockBanner.tsx`**: Componente heredado, ya no se muestra en las pantallas actuales.
+- **`src/components/LocalityPicker.tsx`**: Selector modal de ciudades y municipios de Colombia.
+- **`src/components/Button.tsx`**, **`Input.tsx`**, **`Card.tsx`**, **`ErrorBanner.tsx`**: Componentes base accesibles.
+- **`src/components/LegalNoticeModal.tsx`**: Modal normativo para el Aviso Legal Completo (Punto 1 del Anexo) consumido exclusivamente desde `LEGAL_CONTENT_ES`.
+- **`src/components/CompactLegalNotice.tsx`**: Componente de tarjeta de listado para el Aviso Compacto (Punto 2 del Anexo: *"Información declarada por el usuario"* + ícono que abre el aviso completo).
+- **`src/components/VerifiedUserBadge.tsx`**: Badge interactivo de Usuario Verificado (Punto 4 del Anexo) con modal informativo y fecha dinámica de validación documental.
+- **`src/components/VerificationRequestModal.tsx`**: Formulario oficial de solicitud de verificación (Punto 3 del Anexo: soporte para auto-verificación u organizaciones terceras, aviso de tarifa dinámica o mensaje de costo pendiente, casillas obligatorias y política de datos).
+- **`src/components/VerificationCertificateModal.tsx`**: Visualizador oficial de la Constancia de Verificación Documental (Puntos 5 y 6 del Anexo: expedido por Fundación IMARA, soporte para URL/QR público, marca de borrador legal condicional y banner de revocación si aplica).
+
+### 8.8 Pantallas y Flujos de Navegación (`apps/mobile/app/`)
+- **`app/_layout.tsx`**: Enrutador raíz con inicialización de contexto, SafeArea y ruta pública `/verify/[code]`.
+- **`app/index.tsx`**: Pantalla inicial de bienvenida distrital y presentación institucional.
+- **`app/verify/[code].tsx`**: Pantalla pública de consulta de validez de constancia de verificación documental accesible mediante escaneo de código QR o enlace web directo.
+- **`app/(auth)/_layout.tsx`**: Layout del grupo de autenticación sin cabeceras nativas duplicadas.
+- **`app/(auth)/login.tsx`**: Pantalla de acceso rediseñada fielmente a `maqueta.jpg`: cabecera curva verde bosque, campos en verde bosque oscuro con íconos, botón de acción verde y sellos circulares de sostenibilidad en la base.
+- **`app/(auth)/register.tsx`**: Formulario de registro con tipología de actor, consentimiento expreso de política de datos (Ley 1581) y selección de ciudad o municipio.
+- **`app/(auth)/forgot-password.tsx`**: Flujo de recuperación de contraseña institucional.
+- **`app/(app)/_layout.tsx`**: Layout autenticado con enrutamiento stack unificado y protección de rutas privadas.
+- **`app/(app)/index.tsx` (Inicio / Marketplace)**: Pantalla principal fiel a la maqueta con buscador integrado, carrusel horizontal de categorías, selector de Ofertas/Necesidades, sugerencias de coincidencias y cuadrícula de 2 columnas.
+- **`app/(app)/publish.tsx` (Publicar Materiales)**: Formulario de creación de oferta/demanda con catálogo jerárquico real y subpestaña de gestión de publicaciones propias ("Mis Publicaciones").
+- **`app/(app)/publication/[id].tsx` (Detalle de Publicación)**: Visualizador completo de material con especificaciones técnicas, información de actor verificado (`VerifiedUserBadge`), aviso legal completo con botón *"Solicitar verificación"* y visualizador de constancia.
+- **`app/(app)/chat.tsx` (Negociación y Mensajería)**: Centro de interacción segmentado en Mensajes directos, Propuestas comerciales circulares y Operaciones de trazabilidad.
+- **`app/(app)/profile.tsx` (Mi Perfil)**: Datos personales del usuario, gestión de organizaciones, badge y certificado institucional, radicación de solicitudes de verificación y listado de *"Mis Solicitudes"*.
+- **`app/(app)/edit-profile.tsx`**: Edición de datos personales con persistencia real en PostgreSQL.
+- **`app/(app)/users.tsx`**: Panel de gestión de usuarios de plataforma para administradores.
+- **`app/(app)/admin.tsx`**: Panel de control distrital con 5 pestañas: Dictamen de Organizaciones, Auditoría de Catálogo, Balance de Materiales, Operaciones e Indicadores, y **⚙️ Parámetros** (gestión de tarifas `SELF`/`OTHER`, trazabilidad en `AuditLog`, y ajuste manual de tarifas por solicitud con justificación obligatoria).
+
+---
+
+## 9. Documentación Técnica de Soporte (`docs/`)
+
+- **`docs/manual-usuario.md`**: Manual Exhaustivo de Usuario Final para Generadores, Recicladores, Transportadores y Transformadores (flujo de pantallas, campos, validaciones y preguntas frecuentes).
+- **`docs/manual-administrador.md`**: Manual de Operación y Gobernanza para el Administrador de Plataforma (auditoría de organizaciones, catálogo, balance de masa, KPIs distritales y control de usuarios).
+- **`docs/guia-pruebas-y-flujo.md`**: Guía de Verificación, Pruebas Automatizadas y Flujo del Proyecto (diagrama de secuencia, matriz de casos de prueba y comandos de testing).
+- **`docs/arquitectura.md`**: Diagramas y descripción de la arquitectura Clean Architecture, patrón de monorepo y separación en capas.
+- **`docs/modelo-datos.md`**: Especificación completa del modelo relacional, tablas de PostgreSQL, campos, restricciones de integridad, índices y catálogo de migraciones.
+- **`docs/api.md`**: Especificación de la API REST para los endpoints `/health`, `/auth`, `/users`, `/organizations`, `/catalog`, `/publications`, `/conversations`, `/operations` y `/admin`.
+- **`docs/seguridad.md`**: Matriz de controles de seguridad (Argon2id, JWT, Rate Limiting, OWASP Top 10, Anti-enumeración, Validación con Zod, Protección de Propietario).
+- **`docs/decisiones-tecnicas.md`**: Registro de Decisiones de Arquitectura (ADR-001 al ADR-006).
+- **`docs/plan-pruebas.md`**: Estrategia de testing, cobertura unitaria, de integración y E2E.
+- **`docs/ui-contracts.md`**: Contratos de Interfaz de Usuario y fidelidad a la maqueta visual distrital.
+- **`docs/ejecucion-local.md`**: Guía paso a paso para levantar el proyecto en Windows con PostgreSQL y Expo Go.
+
+---
+
+## 10. Resumen de Buenas Prácticas Aplicadas en el Proyecto
+
+1. **Principio de Responsabilidad Única (SRP)**:
+   - Separación estricta en capas: `Repository` (persistencia pura con Prisma), `Service` (reglas de dominio y validaciones de negocio), `Controller` (manejo de peticiones HTTP Express) y `Routes` (enrutamiento y middlewares).
+2. **Cero Fuga de Información Sensible**:
+   - `passwordHash` se aísla en la base de datos y se descarta inmediatamente en la capa de persistencia mediante `toSafeUser()`.
+   - Los perfiles públicos (`PublicUserDto`) omiten correo y teléfono para proteger la privacidad ciudadana.
+3. **Seguridad Defensiva y Fail-Fast**:
+   - Validación estricta con Zod en arranque (`env.ts`), en peticiones HTTP y en contratos compartidos.
+   - Hashing con Argon2id y verificación en tiempo constante contra ataques de temporización.
+   - Rate limiting diferenciado por criticidad en rutas de autenticación.
+4. **Desacoplamiento Multitenant de Autorización**:
+   - Roles de plataforma (`UserRole`: `USER`, `ADMIN`) separados de roles organizacionales (`Role`: `OWNER`, `ADMIN`, `MEMBER`, `OPERATOR`).
+   - Matriz de permisos granulares (`RolePermission`) y middlewares reutilizables (`requireOrgMember`, `requireOrgPermission`).
+5. **Protección de la Integridad de Datos**:
+   - Regla inviolable: No es posible degradar ni remover al único `OWNER` de una organización activa.
+   - Borrado lógico (`Soft Delete`) mediante marcas temporales `deletedAt` para trazabilidad de operaciones de economía circular.
+6. **Localización Territorial y Legal**:
+   - Integración nativa del contexto de Colombia a nivel nacional (ciudades y municipios, moneda COP, Ley 1581 de 2012 de Habeas Data).

@@ -1,0 +1,7 @@
+#!/bin/sh
+set -eu
+
+# Paso obligatorio antes de cada commit: detecta credenciales demo y secretos
+# de alto riesgo en el árbol de trabajo. No imprime valores, solo archivo y línea.
+echo "Ejecutando escáner obligatorio de secretos..."
+npx tsx scripts/security/scan-secrets.ts

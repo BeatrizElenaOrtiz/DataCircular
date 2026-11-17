@@ -1,0 +1,40 @@
+{
+  "timestamp": "2026-11-06T15:30:21.437Z",
+  "results": [
+    {
+      "test": "RBAC_ADMIN_ACCESS",
+      "status": 403,
+      "expected": 403,
+      "passed": true
+    },
+    {
+      "test": "ADMIN_AUTHORIZED_ACCESS",
+      "status": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "test": "NO_TOKEN_REJECTION",
+      "status": 401,
+      "expected": 401,
+      "passed": true
+    },
+    {
+      "test": "CORRUPT_TOKEN_REJECTION",
+      "status": 401,
+      "expected": 401,
+      "passed": true
+    },
+    {
+      "test": "SQL_INJECTION_DEFENSE",
+      "status": 200,
+      "expected": 200,
+      "passed": true
+    },
+    {
+      "test": "XSS_STRING_CONTAINMENT",
+      "status": 200,
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "name": "data-circular",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plataforma colaborativa para conectar generadores, transportadores, recuperadores y transformadores de materiales recuperables - Fundación IMARA",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "dev:api": "npm --workspace=apps/api run dev",
+    "build": "npm --workspace=packages/shared run build && npm --workspace=apps/api run build",
+    "build:api": "npm --workspace=apps/api run build",
+    "start:api": "npm --workspace=apps/api run start",
+    "test:api": "npm --workspace=apps/api run test",
+    "test:mobile": "npm --workspace=apps/mobile run test:flow",
+    "test:full": "npm --workspace=apps/mobile run test:full-flow",
+    "db:migrate": "npm --workspace=apps/api run db:migrate",
+    "db:deploy": "npm --workspace=apps/api run db:deploy",
+    "db:generate": "npm --workspace=apps/api run db:generate",
+    "db:studio": "npm --workspace=apps/api run db:studio",
+    "db:clean": "npm --workspace=apps/api run db:clean",
+    "admin:bootstrap": "npm --workspace=apps/api run admin:bootstrap",
+    "security:scan": "npx tsx scripts/security/scan-secrets.ts",
+    "security:install-hooks": "git config core.hooksPath .githooks",
+    "dev:mobile": "npm --workspace=apps/mobile run start",
+    "mobile:tunnel": "node scripts/dev.js --tunnel",
+    "mobile:web": "npm --workspace=apps/mobile run web",
+    "mobile:android": "npm --workspace=apps/mobile run android",
+    "mobile:ios": "npm --workspace=apps/mobile run ios"
+  },
+  "keywords": [
+    "circular-economy",
+    "recycling",
+    "marketplace",
+    "data-circular",
+    "imara"
+  ],
+  "author": "Edgar Vásquez",
+  "owner": "Fundación IMARA",
+  "copyright": "© 2026 Fundación IMARA",
+  "license": "UNLICENSED"
+}

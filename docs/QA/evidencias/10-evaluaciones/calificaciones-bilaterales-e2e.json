@@ -1,0 +1,33 @@
+{
+  "operacionId": "e26d4ddc-59fe-4f48-bf41-7e7e5ff39fd7",
+  "evaluaciones": [
+    {
+      "id": "14334bc0-c14f-44fa-b49a-e03093c7a0b2",
+      "operationId": "e26d4ddc-59fe-4f48-bf41-7e7e5ff39fd7",
+      "reviewerUserId": "70efd92d-8874-472d-97c2-573fcb5768fd",
+      "reviewerDisplayName": "Generador Industrial Fontibón SAS",
+      "targetUserId": "cbf024d2-8455-4efa-b613-0cda1e9c0650",
+      "targetDisplayName": "Asociación de Recicladores de Oficio Fontibón",
+      "score": 5,
+      "punctualityScore": 5,
+      "materialQualityScore": 5,
+      "fulfillmentScore": 5,
+      "comment": "Excelente cumplimiento en el horario de recolección y total transparencia en la pesada.",
+      "createdAt": "2026-11-06T15:21:00.691Z"
+    },
+    {
+      "id": "55861864-3fb3-4187-884d-7ba80689c43a",
+      "operationId": "e26d4ddc-59fe-4f48-bf41-7e7e5ff39fd7",
+      "reviewerUserId": "cbf024d2-8455-4efa-b613-0cda1e9c0650",
+      "reviewerDisplayName": "Asociación de Recicladores de Oficio Fontibón",
+      "targetUserId": "70efd92d-8874-472d-97c2-573fcb5768fd",
+      "targetDisplayName": "Generador Industrial Fontibón SAS",
+      "score": 5,
+      "punctualityScore": 5,
+      "materialQualityScore": 5,
+      "fulfillmentScore": 5,
+      "comment": "Material de excelente calidad, completamente limpio y prensado según lo acordado.",
+      "createdAt": "2026-11-06T15:21:00.716Z"
+    }
+  ]
+}
