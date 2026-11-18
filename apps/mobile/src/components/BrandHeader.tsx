@@ -13,6 +13,7 @@ import { UserType } from '@data-circular/shared';
 import { useAuth } from '../context/AuthContext';
 import { Tokens } from '../theme/tokens';
 import { getHomeRoute } from '../navigation';
+import { BrandLogo } from './BrandLogo';
 
 const USER_TYPE_LABELS: Record<UserType, string> = {
   GENERATOR: 'Generador',
@@ -77,9 +78,15 @@ export const BrandHeader: React.FC<BrandHeaderProps> = ({
         </View>
 
         <View style={styles.centerSlot}>
-          <Text style={styles.brandTitle} numberOfLines={1}>
-            {title}
-          </Text>
+          <BrandLogo
+            variant="light"
+            style={title === 'DATA_CIRCULAR' ? styles.brandLogo : styles.compactBrandLogo}
+          />
+          {title !== 'DATA_CIRCULAR' ? (
+            <Text style={styles.brandTitle} numberOfLines={1}>
+              {title}
+            </Text>
+          ) : null}
           {subtitle ? (
             <Text style={styles.brandSubtitle} numberOfLines={1}>
               {subtitle}
@@ -158,12 +165,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 8,
   },
+  brandLogo: {
+    width: 175,
+    height: 60,
+  },
+  compactBrandLogo: {
+    width: 130,
+    height: 44,
+  },
   brandTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: 1.2,
     textAlign: 'center',
+    marginTop: 2,
   },
   brandSubtitle: {
     fontSize: 11,

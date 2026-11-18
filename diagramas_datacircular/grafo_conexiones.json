@@ -1,0 +1,167 @@
+{
+  "proyecto": "DataCircular",
+  "nombre": "Árbol de conexiones del sistema",
+  "base_documental": [
+    "docs/arquitectura.md",
+    "docs/api.md",
+    "docs/modelo-datos.md",
+    "apps/api/prisma/schema.prisma",
+    "apps/api/src/app.ts",
+    "apps/api/src/routes/v1.routes.ts",
+    "apps/mobile/src/config/features.ts",
+    "apps/mobile/src/navigation.ts",
+    "render.yaml",
+    "Informe Técnico §§4.1 y 9; Documento 5 §§4–12"
+  ],
+  "grupos": [
+    {
+      "grupo": "actores",
+      "nodos": [
+        {
+          "id": "actores",
+          "etiqueta": "Actores del dominio\nGenerador · Reciclador/Transformador\nTransportador · ADMIN/verificador"
+        }
+      ]
+    },
+    {
+      "grupo": "cliente",
+      "nodos": [
+        {
+          "id": "movil",
+          "etiqueta": "App móvil Expo Router\nExpo Web + nativo · SecureStore"
+        }
+      ]
+    },
+    {
+      "grupo": "contrato",
+      "nodos": [
+        {
+          "id": "shared",
+          "etiqueta": "@data-circular/shared\nDTO, enums y contratos"
+        }
+      ]
+    },
+    {
+      "grupo": "servidor",
+      "nodos": [
+        {
+          "id": "api",
+          "etiqueta": "API REST Express\n/api/v1 · 15 agrupaciones"
+        },
+        {
+          "id": "mw",
+          "etiqueta": "Middleware\nhelmet · CORS · JWT/sesión · roles"
+        },
+        {
+          "id": "modulos",
+          "etiqueta": "Módulos de dominio\nauth, usuarios, organizaciones, catálogo,\npublicaciones, matches, conversaciones,\npropuestas, operaciones, administración"
+        }
+      ]
+    },
+    {
+      "grupo": "datos",
+      "nodos": [
+        {
+          "id": "prisma",
+          "etiqueta": "Prisma ORM\n25 modelos · 19 enums"
+        },
+        {
+          "id": "db",
+          "etiqueta": "PostgreSQL 18"
+        }
+      ]
+    },
+    {
+      "grupo": "entorno",
+      "nodos": [
+        {
+          "id": "staging",
+          "etiqueta": "Render staging\nweb + base de datos · health /api/v1/health"
+        }
+      ]
+    },
+    {
+      "grupo": "fuente",
+      "nodos": [
+        {
+          "id": "repos",
+          "etiqueta": "Repositorios\nEdgarv2025/DataCircular · desarrollo\nBeatrizElenaOrtiz/DataCircular · entrega"
+        }
+      ]
+    }
+  ],
+  "aristas": [
+    {
+      "origen": "actores",
+      "destino": "movil",
+      "etiqueta": "HTTP/JSON",
+      "tipo": "trazada"
+    },
+    {
+      "origen": "movil",
+      "destino": "api",
+      "etiqueta": "HTTP/JSON · /api/v1",
+      "tipo": "trazada"
+    },
+    {
+      "origen": "movil",
+      "destino": "shared",
+      "etiqueta": "tipos compartidos",
+      "tipo": "punteada"
+    },
+    {
+      "origen": "api",
+      "destino": "shared",
+      "etiqueta": "tipos compartidos",
+      "tipo": "punteada"
+    },
+    {
+      "origen": "api",
+      "destino": "mw",
+      "etiqueta": "cadena de middleware",
+      "tipo": "trazada"
+    },
+    {
+      "origen": "mw",
+      "destino": "modulos",
+      "etiqueta": "enrutamiento",
+      "tipo": "trazada"
+    },
+    {
+      "origen": "modulos",
+      "destino": "prisma",
+      "etiqueta": "repositorios",
+      "tipo": "trazada"
+    },
+    {
+      "origen": "prisma",
+      "destino": "db",
+      "etiqueta": "SQL",
+      "tipo": "trazada"
+    },
+    {
+      "origen": "api",
+      "destino": "staging",
+      "etiqueta": "despliegue staging",
+      "tipo": "trazada"
+    },
+    {
+      "origen": "repos",
+      "destino": "movil",
+      "etiqueta": "código fuente",
+      "tipo": "punteada"
+    },
+    {
+      "origen": "repos",
+      "destino": "api",
+      "etiqueta": "código fuente",
+      "tipo": "punteada"
+    }
+  ],
+  "notas": [
+    "El despliegue documentado es staging; no se afirma ejecución en producción.",
+    "Los repositorios Edgarv2025/DataCircular y BeatrizElenaOrtiz/DataCircular tienen finalidades distintas; no se declara equivalencia ni sincronización.",
+    "La cobertura funcional es nacional en Colombia; Bogotá permanece como sede, zona horaria y valor heredado.",
+    "Sin evidencia de integraciones externas adicionales: no se representan pasarelas, ERP, GPS ni mensajería externa."
+  ]
+}

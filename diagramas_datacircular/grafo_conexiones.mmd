@@ -1,0 +1,36 @@
+flowchart LR
+  subgraph g_actores["Actores"]
+    actores["Actores del dominio<br/>Generador · Reciclador/Transformador<br/>Transportador · ADMIN/verificador"]
+  end
+  subgraph g_cliente["Cliente"]
+    movil["App móvil Expo Router<br/>Expo Web + nativo · SecureStore"]
+  end
+  subgraph g_contrato["Contrato"]
+    shared["@data-circular/shared<br/>DTO, enums y contratos"]
+  end
+  subgraph g_servidor["Servidor"]
+    api["API REST Express<br/>/api/v1 · 15 agrupaciones"]
+    mw["Middleware<br/>helmet · CORS · JWT/sesión · roles"]
+    modulos["Módulos de dominio<br/>auth, usuarios, organizaciones, catálogo,<br/>publicaciones, matches, conversaciones,<br/>propuestas, operaciones, administración"]
+  end
+  subgraph g_datos["Datos"]
+    prisma["Prisma ORM<br/>25 modelos · 19 enums"]
+    db["PostgreSQL 18"]
+  end
+  subgraph g_entorno["Entorno"]
+    staging["Render staging<br/>web + base de datos · health /api/v1/health"]
+  end
+  subgraph g_fuente["Fuente"]
+    repos["Repositorios<br/>Edgarv2025/DataCircular · desarrollo<br/>BeatrizElenaOrtiz/DataCircular · entrega"]
+  end
+  actores -->|"HTTP/JSON"| movil
+  movil -->|"HTTP/JSON · /api/v1"| api
+  movil -.->|"tipos compartidos"| shared
+  api -.->|"tipos compartidos"| shared
+  api -->|"cadena de middleware"| mw
+  mw -->|"enrutamiento"| modulos
+  modulos -->|"repositorios"| prisma
+  prisma -->|"SQL"| db
+  api -->|"despliegue staging"| staging
+  repos -.->|"código fuente"| movil
+  repos -.->|"código fuente"| api

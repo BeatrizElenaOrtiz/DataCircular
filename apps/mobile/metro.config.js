@@ -7,9 +7,10 @@ const monorepoRoot = path.resolve(projectRoot, '../..');
 
 const config = getDefaultConfig(projectRoot);
 
-// 1. Vigilar únicamente packages/shared para acelerar drásticamente el inicio en Windows
+// 1. Vigilar los recursos locales del monorepo usados por la app móvil
 config.watchFolders = [
   path.resolve(monorepoRoot, 'packages/shared'),
+  path.resolve(monorepoRoot, 'img'),
 ];
 
 // 2. Resolver módulos locales y de la raíz del monorepo
@@ -17,6 +18,7 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(monorepoRoot, 'node_modules'),
 ];
+config.resolver.assetExts = [...config.resolver.assetExts, 'PNG'];
 
 // 3. Bloquear rastreo de apps/api y .git para evitar sobrecarga de archivos en Metro
 config.resolver.blockList = [

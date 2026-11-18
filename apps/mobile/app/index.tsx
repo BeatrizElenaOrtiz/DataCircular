@@ -12,6 +12,7 @@ import { useAuth } from '../src/context/AuthContext';
 import { Colors } from '../src/theme/colors';
 import { Button } from '../src/components/Button';
 import { Card } from '../src/components/Card';
+import { BrandLogo } from '../src/components/BrandLogo';
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -45,10 +46,7 @@ export default function WelcomeScreen() {
 
         {/* Encabezado Principal */}
         <View style={styles.header}>
-          <View style={styles.logoBadge}>
-            <Text style={styles.logoIcon}>♻️</Text>
-          </View>
-          <Text style={styles.brandTitle}>DATA_CIRCULAR</Text>
+          <BrandLogo variant="dark" style={styles.brandLogo} />
           <Text style={styles.brandSubtitle}>
             Plataforma de Economía Circular • Fundación IMARA
           </Text>
@@ -171,23 +169,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  logoBadge: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: Colors.brandOrange,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  logoIcon: {
-    fontSize: 36,
-  },
-  brandTitle: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: Colors.primaryDark,
-    letterSpacing: 1,
+  brandLogo: {
+    width: 240,
+    height: 84,
   },
   brandSubtitle: {
     fontSize: 14,

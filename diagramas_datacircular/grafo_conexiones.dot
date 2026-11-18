@@ -1,0 +1,26 @@
+digraph DataCircular {
+  rankdir=LR;
+  node [shape=box, style=rounded, fontname="DejaVu Sans", fontsize=9];
+  edge [fontname="DejaVu Sans", fontsize=8, color="#546E7A"];
+  actores [label="Actores del dominio\nGenerador · Reciclador/Transformador\nTransportador · ADMIN/verificador", fillcolor="#ECEFF1", style="rounded,filled"];
+  movil [label="App móvil Expo Router\nExpo Web + nativo · SecureStore", fillcolor="#ECEFF1", style="rounded,filled"];
+  shared [label="@data-circular/shared\nDTO, enums y contratos", fillcolor="#ECEFF1", style="rounded,filled"];
+  api [label="API REST Express\n/api/v1 · 15 agrupaciones", fillcolor="#ECEFF1", style="rounded,filled"];
+  mw [label="Middleware\nhelmet · CORS · JWT/sesión · roles", fillcolor="#ECEFF1", style="rounded,filled"];
+  modulos [label="Módulos de dominio\nauth, usuarios, organizaciones, catálogo,\npublicaciones, matches, conversaciones,\npropuestas, operaciones, administración", fillcolor="#ECEFF1", style="rounded,filled"];
+  prisma [label="Prisma ORM\n25 modelos · 19 enums", fillcolor="#ECEFF1", style="rounded,filled"];
+  db [label="PostgreSQL 18", fillcolor="#ECEFF1", style="rounded,filled"];
+  staging [label="Render staging\nweb + base de datos · health /api/v1/health", fillcolor="#ECEFF1", style="rounded,filled"];
+  repos [label="Repositorios\nEdgarv2025/DataCircular · desarrollo\nBeatrizElenaOrtiz/DataCircular · entrega", fillcolor="#ECEFF1", style="rounded,filled"];
+  actores -> movil [label="HTTP/JSON", style=solid];
+  movil -> api [label="HTTP/JSON · /api/v1", style=solid];
+  movil -> shared [label="tipos compartidos", style=dotted];
+  api -> shared [label="tipos compartidos", style=dotted];
+  api -> mw [label="cadena de middleware", style=solid];
+  mw -> modulos [label="enrutamiento", style=solid];
+  modulos -> prisma [label="repositorios", style=solid];
+  prisma -> db [label="SQL", style=solid];
+  api -> staging [label="despliegue staging", style=solid];
+  repos -> movil [label="código fuente", style=dotted];
+  repos -> api [label="código fuente", style=dotted];
+}
